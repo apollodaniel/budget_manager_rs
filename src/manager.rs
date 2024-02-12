@@ -146,6 +146,7 @@ impl Transaction {
 
 }
 
+#[derive(Debug)]
 pub struct Category{
     pub category_id: u32,
     pub name: String
@@ -174,6 +175,7 @@ impl Category {
     }
 }
 
+#[derive(Debug)]
 pub enum BudgetCommand<'a>{
     // creation
     CreateTransaction(Transaction),

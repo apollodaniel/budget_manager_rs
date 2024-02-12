@@ -1,13 +1,39 @@
-use std::error::Error;
+use std::{error::Error, io::stdout};
 
-use manager::{command_processing::process, Transaction};
+use app::App;
+use crossterm::event::KeyCode;
+use events::{CrosstermTerminal, Event, EventHandler};
+use ratatui::backend::CrosstermBackend;
+use tui::Tui;
+use ui::draw;
+use update::update;
 
 
-
+pub mod app;
+pub mod events;
+pub mod tui;
+pub mod ui;
+pub mod update;
 pub mod manager;
 
 fn main() -> Result<(), Box<(dyn Error)>> {
-    process(manager::BudgetCommand::CreateTransaction(Transaction::new(2.0, 1, "teste".to_string())?))?;
+    
+    Tui::enter()?;
+    
+    let mut app = App::new()?;
+    let terminal = CrosstermTerminal::new(CrosstermBackend::new(stdout()))?;
+    let mut tui = Tui::new(terminal, EventHandler::new(250));
+    
+    while !app.should_quit{
+
+        match tui.events.next()? {
+            Event::Key(e) => update(&mut app, &e)?,
+            Event::Tick => draw(&mut tui.terminal, &mut app)?
+        }
+
+    }
+
+    Tui::reset()?;
 
     Ok(())
 }
