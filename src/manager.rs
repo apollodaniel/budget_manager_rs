@@ -96,7 +96,7 @@ pub mod command_processing{
             BudgetCommand::UpdateTransaction(t,o) => connection.execute(&t.update(o), [])?,
             // categories
             BudgetCommand::CreateCategory(c) => connection.execute(&c.to_sql_insert(), [])?,
-            BudgetCommand::DeleteCategory(c) => connection.execute(&&c.to_sql_delete(), [])?,
+            BudgetCommand::DeleteCategory(c) => connection.execute(&c.to_sql_delete(), [])?,
             BudgetCommand::UpdateCategory(c, o) => connection.execute(&c.update(&o), [])?,
         };
 
@@ -163,7 +163,7 @@ impl Category {
     }
 
     fn to_sql_insert(&self) -> String{
-        format!("INSERT INTO categories (category_id, name) values ({},'{}')", self.name, self.category_id)
+        format!("INSERT INTO categories (category_id, name) values ({},'{}')", self.category_id, self.name)
     }
     fn to_sql_delete(&self) -> String{
         format!("DELETE FROM categories WHERE category_id={}", self.category_id)

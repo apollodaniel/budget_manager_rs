@@ -19,15 +19,17 @@ pub enum AppState{
 
 #[derive(Debug)]
 pub enum ListingState{
-    Listing,
-    Searching
+    List,
+    Search,
+    Add
 }
 
 #[derive(Debug)]
 pub struct App<'a>{
     pub app_state: AppState,
     pub listing_state: ListingState,
-    pub text_area: TextArea<'a>,
+    pub search_text_area: TextArea<'a>,
+    pub add_text_area: TextArea<'a>,
 
     pub transactions: Vec<Transaction>,
     pub categories: Vec<Category>,
@@ -48,6 +50,17 @@ pub enum MoveSelection{
 
 impl<'a> App<'a> {
 
+    pub fn update_categories(&mut self)->Result<(), Box<(dyn Error)>>{
+        self.categories = list_categories()?;
+        self.search_category();
+        Ok(())
+    }
+    pub fn update_transactions(&mut self)->Result<(), Box<(dyn Error)>>{
+        self.transactions = list_transaction()?;
+        self.search_transactions();
+        Ok(())
+    }
+
     fn create_list_state()->ListState{
         ListState::default().with_selected(Some(0))
     }
@@ -60,21 +73,22 @@ impl<'a> App<'a> {
         match move_selection {
             MoveSelection::Up => {
                 if let Some(selected) = self.categories_list_state.selected() {
-                    if selected + 1 >= self.categories.len(){
-                        self.categories_list_state.select(Some(0));
-                    }else{
-                        self.categories_list_state.select(Some(selected+1));
-                    }
-                }
-            }
-            MoveSelection::Down => {
-                if let Some(selected) = self.categories_list_state.selected() {
                     if let Some(res) = selected.checked_sub(1){
                         self.categories_list_state.select(Some(res));
                     }else{
                         self.categories_list_state.select(Some(self.categories.len()-1));
                     }
                 }
+            }
+            MoveSelection::Down => {
+                if let Some(selected) = self.categories_list_state.selected() {
+                    if selected + 1 >= self.categories.len(){
+                        self.categories_list_state.select(Some(0));
+                    }else{
+                        self.categories_list_state.select(Some(selected+1));
+                    }
+                }
+                
             },
         }
     }
@@ -102,21 +116,37 @@ impl<'a> App<'a> {
         }
     }
 
-    fn get_new_text_area()->TextArea<'a>{
-        let text_area_block = Block::new().title("Search category").borders(Borders::all());
+    fn get_new_text_area(label: &'a str)->TextArea<'a>{
+        let text_area_block = Block::new().title(label).borders(Borders::all());
         let mut text_area = TextArea::default();
         text_area.set_block(text_area_block);
         text_area
     }
     pub fn clear_input(&mut self){
-        self.text_area.delete_line_by_head();
+        match self.listing_state {
+            ListingState::Add => {
+                self.add_text_area.delete_line_by_head();
+            },
+            ListingState::Search => {
+                self.search_text_area.delete_line_by_head();
+                match self.app_state {
+                    AppState::CategoriesList => self.search_category(),
+                    AppState::TransactionsList(_) => self.search_transactions(),
+                    _=>{}
+                }
+            },
+            ListingState::List=>{
+                self.add_text_area.delete_line_by_head();
+                self.search_text_area.delete_line_by_head();
+            }
+        }
     }
     pub fn search_category(&mut self){
-        let query = self.text_area.lines().first().unwrap().to_lowercase();
+        let query = self.search_text_area.lines().first().unwrap().to_lowercase();
         self.categories_search = self.categories.iter().filter(|f| f.name.to_lowercase().starts_with(query.as_str())).map(|f|f.name.clone()).collect();
     }
     pub fn search_transactions(&mut self){
-        let query = self.text_area.lines().first().unwrap().to_lowercase();
+        let query = self.search_text_area.lines().first().unwrap().to_lowercase();
         self.transactions_search = self.transactions.iter().filter(|f| f.description.to_lowercase().starts_with(query.as_str())).map(|f|f.description.clone()).collect();
     }
 
@@ -126,8 +156,9 @@ impl<'a> App<'a> {
 
         Ok(Self {
             app_state: AppState::CategoriesList,
-            listing_state: ListingState::Listing,
-            text_area: App::get_new_text_area(),
+            listing_state: ListingState::List,
+            search_text_area: App::get_new_text_area("Search"),
+            add_text_area: App::get_new_text_area("Add"),
             transactions_search: transactions.iter().map(|f|f.description.clone()).collect(),
             categories_search: categories.iter().map(|f|f.name.clone()).collect(),
             transactions: transactions,
