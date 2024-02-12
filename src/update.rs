@@ -58,15 +58,19 @@ pub fn update_categories_list(app: &mut App, input: &Input)->Result<(), Box<(dyn
                     app.change_listing_state(ListingState::List)
                 },
                 Input { key: Key::Enter, .. }=>{
-                    process(
-                        crate::manager::BudgetCommand::CreateCategory(
-                            Category::new(
-                                app.add_text_area.lines().first().unwrap_or(&String::new()).to_string()
-                            )?
-                        )
-                    )?;
-                    app.update_categories()?;
-                    app.clear_input();
+                    if let Some(input) = app.add_text_area.lines().first(){
+                        if !input.is_empty(){
+                            process(
+                                crate::manager::BudgetCommand::CreateCategory(
+                                    Category::new(
+                                        app.add_text_area.lines().first().unwrap_or(&String::new()).to_string()
+                                    )?
+                                )
+                            )?;
+                            app.update_categories()?;
+                            app.clear_input();
+                        }
+                    }
                     app.change_listing_state(ListingState::List);
                 },
                 input => {
