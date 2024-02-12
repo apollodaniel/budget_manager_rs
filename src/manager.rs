@@ -104,7 +104,7 @@ pub mod command_processing{
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Transaction{
     pub id: u32,
     pub amount: f64,
@@ -146,7 +146,7 @@ impl Transaction {
 
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Category{
     pub category_id: u32,
     pub name: String

@@ -2,12 +2,13 @@ use std::{io::Stdout, sync::mpsc::{channel, Receiver, Sender}, thread, time::{Du
 
 use crossterm::event::{self, KeyEvent};
 use ratatui::{backend::CrosstermBackend, Terminal};
+use tui_textarea::Input;
 
 pub type CrosstermTerminal = Terminal<CrosstermBackend<Stdout>>;
 
 pub enum Event{
     Tick,
-    Key(KeyEvent)
+    Key(Input)
 }
 
 pub struct EventHandler{
@@ -33,7 +34,7 @@ impl EventHandler {
                     sender.send(Event::Tick).expect("unable to send tick event");
                     if event::poll(timeout).expect("unable to pool events"){
                         if let crossterm::event::Event::Key(e) = event::read().expect("unable to read events"){
-                            sender.send(Event::Key(e)).expect("unable to send key event");
+                            sender.send(Event::Key(e.into())).expect("unable to send key event");
                         }
                     }
 
