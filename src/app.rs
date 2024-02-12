@@ -34,8 +34,8 @@ pub struct App<'a>{
     pub transactions: Vec<Transaction>,
     pub categories: Vec<Category>,
     
-    pub transactions_search: Vec<String>,
-    pub categories_search: Vec<String>,
+    pub transactions_search: Vec<Transaction>,
+    pub categories_search: Vec<Category>,
     
     pub should_quit: bool,
 
@@ -49,6 +49,42 @@ pub enum MoveSelection{
 }
 
 impl<'a> App<'a> {
+
+    pub fn get_selected_category(&self) -> Option<Category>{
+        let selected = self.categories_list_state.selected();
+        if let Some(selected) = selected {
+            let id = self.categories_search[selected].category_id;
+
+            let mut category: Option<Category> = None;
+            for _category in &self.categories{
+                if _category.category_id == id{
+                    category = Some(_category.clone());
+                    break;
+                }
+            }
+            return category;  
+        }else{
+            return None;
+        }
+    }
+
+    pub fn get_selected_transaction(&self) -> Option<Transaction>{
+        let selected = self.transactions_list_state.selected();
+        if let Some(selected) = selected {
+            let id = self.transactions_search[selected].id;
+
+            let mut transaction: Option<Transaction> = None;
+            for _transaction in &self.transactions{
+                if _transaction.id == id{
+                    transaction = Some(_transaction.clone());
+                    break;
+                }
+            }
+            return transaction;  
+        }else{
+            return None;
+        }
+    }
 
     pub fn update_categories(&mut self)->Result<(), Box<(dyn Error)>>{
         self.categories = list_categories()?;
@@ -143,11 +179,11 @@ impl<'a> App<'a> {
     }
     pub fn search_category(&mut self){
         let query = self.search_text_area.lines().first().unwrap().to_lowercase();
-        self.categories_search = self.categories.iter().filter(|f| f.name.to_lowercase().starts_with(query.as_str())).map(|f|f.name.clone()).collect();
+        self.categories_search = self.categories.clone().into_iter().filter(|f| f.name.to_lowercase().contains(query.as_str())).collect::<Vec<Category>>();
     }
     pub fn search_transactions(&mut self){
         let query = self.search_text_area.lines().first().unwrap().to_lowercase();
-        self.transactions_search = self.transactions.iter().filter(|f| f.description.to_lowercase().starts_with(query.as_str())).map(|f|f.description.clone()).collect();
+        self.transactions_search = self.transactions.clone().into_iter().filter(|f| f.description.to_lowercase().contains(query.as_str())).collect::<Vec<Transaction>>();
     }
 
     pub fn new()->Result<Self, Box<(dyn Error)>>{
@@ -159,8 +195,8 @@ impl<'a> App<'a> {
             listing_state: ListingState::List,
             search_text_area: App::get_new_text_area("Search"),
             add_text_area: App::get_new_text_area("Add"),
-            transactions_search: transactions.iter().map(|f|f.description.clone()).collect(),
-            categories_search: categories.iter().map(|f|f.name.clone()).collect(),
+            transactions_search: transactions.clone(),
+            categories_search: categories.clone(),
             transactions: transactions,
             categories: categories,
             should_quit: false,

@@ -8,7 +8,7 @@ use crate::{app::{self, App}, events::CrosstermTerminal};
 
 pub fn draw_categories_list(app: &mut App, terminal: &mut CrosstermTerminal)->Result<(), Box<(dyn Error)>>{
     let block = Block::default().title("Categories").borders(Borders::ALL);
-    let list = List::new(app.categories_search.clone())
+    let list = List::new(app.categories_search.iter().map(|f|f.name.clone()).collect::<Vec<String>>().clone())
         .block(block)
         .style(Style::default().fg(Color::White))
         .highlight_style(Style::default().add_modifier(Modifier::BOLD))

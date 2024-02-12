@@ -22,7 +22,14 @@ pub fn update_categories_list(app: &mut App, input: &Input)->Result<(), Box<(dyn
                 },
                 Input { key: Key::Char('f'), ctrl: true, ..} => {
                     app.change_listing_state(ListingState::Search);
-                }
+                },
+                Input { key: Key::Char('d'), ctrl: true, ..} => {
+                    let selected_category = app.get_selected_category();
+                    if let Some(category) = selected_category {
+                        process(crate::manager::BudgetCommand::DeleteCategory(category))?;
+                        app.update_categories()?;
+                    }
+                },
                 _=>{}
             }
 
@@ -59,6 +66,7 @@ pub fn update_categories_list(app: &mut App, input: &Input)->Result<(), Box<(dyn
                         )
                     )?;
                     app.update_categories()?;
+                    app.clear_input();
                     app.change_listing_state(ListingState::List);
                 },
                 input => {
