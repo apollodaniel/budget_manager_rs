@@ -1,5 +1,6 @@
 use std::{error::Error, fs::{create_dir, File}, time::UNIX_EPOCH};
 
+use chrono::DateTime;
 use rusqlite::{Connection, Row};
 
 use self::command_processing::{get_new_category_id, get_new_transaction_id};
@@ -110,7 +111,7 @@ pub struct Transaction{
     pub amount: f64,
     pub category_id: u32,
     pub description: String,
-    timestamp: u64,
+    timestamp: i64,
 }
 
 impl Transaction {
@@ -124,9 +125,18 @@ impl Transaction {
         })
     }
 
+    pub fn get_date_formatted(&self)->Option<String>{
+        let datetime = chrono::DateTime::from_timestamp_millis(self.timestamp);
+        if let Some(e) = datetime {
+            return Some(e.format("%e %b %Y").to_string());
+        }else{
+            return None;
+        }
+    }
+
     pub fn new(amount: f64, category_id: u32, description: String) -> Result<Self, Box<(dyn Error)>>{
         let id = get_new_transaction_id()?;
-        Ok(Self { id: id, amount: amount, category_id: category_id, description: description, timestamp: UNIX_EPOCH.elapsed()?.as_secs()})
+        Ok(Self { id: id, amount: amount, category_id: category_id, description: description, timestamp: UNIX_EPOCH.elapsed()?.as_secs() as i64})
     }
 
     fn to_sql_insert(&self) -> String{
