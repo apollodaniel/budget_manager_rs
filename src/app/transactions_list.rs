@@ -43,7 +43,7 @@ impl TransactionListScreen{
             search_text_area: App::get_new_text_area("Search"),
             add_text_area: App::get_new_text_area("Add"),
             transactions_search: transactions.clone(),
-            transactions_list_state: App::create_list_state(),
+            transactions_list_state: App::create_list_state(0),
             transactions: transactions,
             current_date: date.clone(),
             category: category.clone(),

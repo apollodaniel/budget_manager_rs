@@ -106,8 +106,8 @@ pub struct App{
 impl App {
 
 
-    fn create_list_state()->ListState{
-        ListState::default().with_selected(Some(0))
+    fn create_list_state(selected: usize)->ListState{
+        ListState::default().with_selected(Some(selected))
     }
 
     pub fn change_app_state(&mut self, state: AppState){

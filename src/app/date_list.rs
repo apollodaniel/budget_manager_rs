@@ -4,7 +4,7 @@ use ratatui::widgets::ListState;
 use crate::manager::{command_processing::list_transaction, Category, Transaction};
 use tui_textarea::TextArea;
 
-use super::{transactions_list::TransactionHashmapValueError, App, ListingState, MoveListSelection};
+use super::{transactions_list::TransactionHashmapValueError, App, ListScreen, ListingState, MoveListSelection};
 
 #[derive(Debug)]
 pub struct DateListScreen{
@@ -32,6 +32,11 @@ impl DateListScreen {
         Ok(transactions_hashmap)
     }
 
+    pub fn search_dates(&mut self){
+        let query = self.search_text_area.lines().first().unwrap().to_lowercase();
+        self.date_search = self.transactions.keys().filter(|f| f.to_lowercase().contains(query.as_str())).map(|f|f.clone()).collect::<Vec<String>>();
+    }
+
     pub fn get_dates(transactions: Vec<Transaction>)->Option<Vec<String>>{
         let dates = Self::transaction_list_to_date_hashmap(transactions)?;
         let dates = dates.keys().map(|f|f.clone()).collect();
@@ -48,7 +53,7 @@ impl DateListScreen {
             date_search: transactions.keys().map(|f|f.clone()).collect::<Vec<String>>(),
             transactions: transactions,
             category: category,
-            date_list_state: App::create_list_state(),
+            date_list_state: App::create_list_state(0),
         })
     }
 
@@ -72,5 +77,23 @@ impl DateListScreen {
 impl MoveListSelection<String> for DateListScreen {
     fn move_list_selection(&mut self, move_selection: super::MoveSelection) {
         Self::move_list_selection_logic(move_selection,&mut self.date_list_state, &self.date_search)
+    }
+}
+
+impl ListScreen for DateListScreen {
+    fn change_listing_state(&mut self, listing_state: ListingState) {
+        self.listing_state = listing_state;
+    }
+    fn clear_input(&mut self) {
+        let listing_state = &mut self.listing_state;
+        let add_text_area = &mut self.add_text_area;
+        let search_text_area = &mut self.search_text_area;
+        
+
+        Self::clear_input_logic(listing_state, add_text_area, search_text_area);
+        if let ListingState::Search = listing_state {
+            self.search_dates();
+        }
+        //Self::clear_input_logic(&mut self.listing_state, &mut self.add_text_area, &mut self.search_text_area, ||{self.search_category()});
     }
 }

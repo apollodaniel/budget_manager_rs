@@ -13,8 +13,9 @@ pub fn update(screen: &mut CategoryListScreen, input: &Input, sender: Sender<Eve
         crate::app::ListingState::List => {
 
             match &input {
-                Input { key: Key::Esc, .. } => {
+                Input { key: Key::Char('l'), ctrl: true, .. } => {
                     screen.clear_input();
+                    screen.search_category();
                 },
                 Input { key: Key::Up, .. }=> screen.move_list_selection(crate::app::MoveSelection::Up),
                 Input { key: Key::Down, .. }=>screen.move_list_selection(crate::app::MoveSelection::Down),

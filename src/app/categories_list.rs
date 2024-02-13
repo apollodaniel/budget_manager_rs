@@ -29,7 +29,29 @@ impl CategoryListScreen{
             search_text_area: App::get_new_text_area("Search"),
             add_text_area: App::get_new_text_area("Add"),
             categories_search: categories.clone(),
-            categories_list_state: App::create_list_state(),
+            categories_list_state: App::create_list_state(0),
+            categories: categories,
+            listing_state: ListingState::List
+        })
+    }
+
+    pub fn new_with_selected(category: Category)->Result<Self, Box<(dyn Error)>>{
+        let categories = list_categories()?;
+
+        let mut index = 0;
+
+        for c in &categories{
+            if c.category_id == category.category_id{ 
+                break;
+            }
+            index+=1;
+        }
+
+        Ok(Self { 
+            search_text_area: App::get_new_text_area("Search"),
+            add_text_area: App::get_new_text_area("Add"),
+            categories_search: categories.clone(),
+            categories_list_state: App::create_list_state(index),
             categories: categories,
             listing_state: ListingState::List
         })
