@@ -1,23 +1,27 @@
 use std::{io::Stdout, sync::mpsc::{channel, Receiver, Sender}, thread, time::{Duration, Instant}};
 
-use crossterm::event::{self, KeyEvent};
+use crossterm::event;
 use ratatui::{backend::CrosstermBackend, Terminal};
 use tui_textarea::Input;
+
+use crate::app::AppState;
 
 pub type CrosstermTerminal = Terminal<CrosstermBackend<Stdout>>;
 
 pub enum Event{
     Tick,
-    Key(Input)
+    Key(Input),
+    ChangeAppState(AppState)
 }
 
 pub struct EventHandler{
-    receiver: Receiver<Event>
+    receiver: Receiver<Event>,
+    sender: Sender<Event>
 }
 
 impl EventHandler {
     
-    pub fn new(tick_rate: u64) -> Self{
+    pub fn new(tick_rate: u64) -> EventHandler{
 
         let tick_rate = Duration::from_millis(tick_rate);
 
@@ -25,8 +29,8 @@ impl EventHandler {
 
         // key & tick events
         {
+            let sender = sender.clone();
             thread::spawn(move||{
-                let sender = sender.clone();
                 let mut last_time = Instant::now();
                 loop {
                     let timeout = tick_rate.checked_sub(last_time.elapsed()).unwrap_or(tick_rate);
@@ -46,10 +50,14 @@ impl EventHandler {
             });
         }
 
-        Self{receiver: receiver}
+        Self{receiver: receiver, sender: sender.clone()}
     }
 
     pub fn next(&self) -> Result<Event, std::sync::mpsc::RecvError>{
         self.receiver.recv()
+    }
+
+    pub fn get_sender(&self) -> Sender<Event>{
+        self.sender.clone()
     }
 }

@@ -1,7 +1,6 @@
 use std::{error::Error, io::stdout};
 
 use app::App;
-use crossterm::event::KeyCode;
 use events::{CrosstermTerminal, Event, EventHandler};
 use ratatui::backend::CrosstermBackend;
 use tui::Tui;
@@ -27,10 +26,12 @@ fn main() -> Result<(), Box<(dyn Error)>> {
     while !app.should_quit{
 
         match tui.events.next()? {
-            Event::Key(e) => update(&mut app, &e)?,
-            Event::Tick => draw(&mut tui.terminal, &mut app)?
+            Event::Key(e) => update(&mut app, &e, tui.events.get_sender())?,
+            Event::Tick => draw(&mut tui.terminal, &mut app)?,
+            Event::ChangeAppState(app_state)=>{
+                app.change_app_state(app_state);
+            }
         }
-
     }
 
     Tui::reset()?;
