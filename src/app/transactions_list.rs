@@ -4,7 +4,7 @@ use std::error::Error;
 use ratatui::widgets::ListState;
 use tui_textarea::TextArea;
 use crate::manager::{command_processing::list_transaction, Category, Transaction};
-use super::{date_list::DateListScreen, App, ListingState};
+use super::{date_list::DateListScreen, App, ListScreen, ListingState, MoveListSelection, MoveSelection};
 
 
 #[derive(Debug)]
@@ -61,7 +61,7 @@ impl TransactionListScreen{
             }
         )?;
                 //&self.transactions[&date]
-        Ok(transactions_hashmap[date].clone())
+        Ok(transactions_hashmap.get(date).unwrap_or(&vec![]).clone())
     }
 
     pub fn get_selected_transaction(&self) -> Option<Transaction>{
@@ -93,4 +93,20 @@ impl TransactionListScreen{
         self.transactions_search = self.transactions.clone().into_iter().filter(|f| f.description.to_lowercase().contains(query.as_str())).collect::<Vec<Transaction>>();
     }
 
+}
+
+impl MoveListSelection<Transaction> for TransactionListScreen {
+    
+    fn move_list_selection(&mut self, move_selection: MoveSelection) {
+        Self::move_list_selection_logic(move_selection,&mut self.transactions_list_state, &self.transactions);   
+    }
+}
+
+impl ListScreen for TransactionListScreen {
+    fn change_listing_state(&mut self, listing_state: ListingState) {
+        self.listing_state = listing_state;
+    }
+    fn clear_input(&mut self) {
+        Self::clear_input_logic(&mut self.listing_state, &mut self.add_text_area, &mut self.search_text_area)
+    }
 }

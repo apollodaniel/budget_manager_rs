@@ -12,9 +12,6 @@ pub enum Event{
     Tick,
     Key(Input),
     ChangeAppState(AppState),
-    UpdateTransactions,
-    UpdateCategories,
-    UpdateAll
 }
 
 pub struct EventHandler{

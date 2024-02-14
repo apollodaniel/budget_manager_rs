@@ -31,7 +31,6 @@ fn main() -> Result<(), Box<(dyn Error)>> {
             Event::ChangeAppState(app_state)=>{
                 app.change_app_state(app_state);
             },
-            _=>{}
         }
     }
 

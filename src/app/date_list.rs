@@ -57,6 +57,21 @@ impl DateListScreen {
         })
     }
 
+    pub fn new_with_selected(category: Category, date: String)->Result<Self, Box<(dyn Error)>>{
+        let transactions = Self::get_transactions_hashmaps(&category)?;
+        let date_search = transactions.keys().map(|f|f.clone()).collect::<Vec<String>>();
+        let index = date_search.iter().position(|f| f==&date).unwrap_or(0);
+        Ok(Self { 
+            search_text_area: App::get_new_focused_text_area("Search",""),
+            add_text_area: App::get_new_focused_text_area("Add",""),
+            listing_state: ListingState::List,
+            date_search: date_search,
+            transactions: transactions,
+            category: category,
+            date_list_state: App::create_list_state(index),
+        })
+    }
+
     pub fn get_selected_date(&self) -> Option<String>{
         let selected = self.date_list_state.selected()?;
         return Some(self.date_search[selected].clone());  

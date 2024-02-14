@@ -1,8 +1,8 @@
-use std::{error::Error, sync::mpsc::Sender};
+use std::{error::Error, fmt::Display, sync::mpsc::Sender};
 
 use tui_textarea::{Input, Key};
 
-use crate::{app::{date_list::DateListScreen, ListScreen, ListingState, MoveListSelection, new_transaction::{NewTransactionParent, NewTransactionScreen}}, events::Event};
+use crate::{app::{date_list::DateListScreen, new_transaction::{NewTransactionParent, NewTransactionScreen}, transactions_list::TransactionListScreen, ListScreen, ListingState, MoveListSelection}, events::Event};
 
 
 
@@ -42,6 +42,13 @@ pub fn update(screen: &mut DateListScreen, input: &Input, sender: Sender<Event>)
                 },
                 Input { key: Key::Enter, .. }=>{
                     // screen.change_listing_state(ListingState::List)
+                    sender.send(
+                        Event::ChangeAppState(
+                            crate::app::AppState::TransactionsList(
+                                TransactionListScreen::new(&screen.category, &screen.get_selected_date().ok_or(InvalidSelectionError)?)?
+                            )
+                        )
+                    )?;
                 },
                 _=>{}
             }
@@ -95,3 +102,13 @@ pub fn update(screen: &mut DateListScreen, input: &Input, sender: Sender<Event>)
     
     Ok(())
 }
+
+#[derive(Debug)]
+pub struct InvalidSelectionError;
+
+impl Display for InvalidSelectionError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "unable to get selection")
+    }
+}
+impl Error for InvalidSelectionError {}
