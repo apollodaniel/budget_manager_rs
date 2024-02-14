@@ -43,13 +43,14 @@ pub struct NewTransactionScreen{
     pub amount_text_area: TextArea<'static>,
     pub focus: NewTransactionScreenFocus,
     pub parent: NewTransactionParent,
+    pub error: Option<String>,
 
     pub date: Option<String>
 }
 
 impl NewTransactionScreen {
     pub fn new(parent: NewTransactionParent,date: Option<String>)->Self{
-        Self {parent: parent,focus: NewTransactionScreenFocus::DescriptionInput, description_text_area: App::get_new_focused_text_area("Description", ""), amount_text_area: App::get_new_text_area("Amount", "") ,date_text_area: App::get_new_text_area("Date separated by /", ""), date: date }
+        Self {error: None,parent: parent,focus: NewTransactionScreenFocus::DescriptionInput, description_text_area: App::get_new_focused_text_area("Description", ""), amount_text_area: App::get_new_text_area("Amount", "") ,date_text_area: App::get_new_text_area("Date separated by /", ""), date: date }
     }
 }
 

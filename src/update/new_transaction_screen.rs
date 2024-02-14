@@ -1,8 +1,7 @@
-use std::{error::Error, str::FromStr, sync::mpsc::Sender};
-use chrono::Utc;
+use std::{error::Error, sync::mpsc::Sender};
 use tui_textarea::{Input, Key};
 
-use crate::{app::{App, new_transaction::{NewTransactionParent, NewTransactionScreen, NewTransactionScreenFocus}}, events::Event};
+use crate::{app::{new_transaction::{NewTransactionParent, NewTransactionScreen, NewTransactionScreenFocus}, App}, events::Event, manager::{command_processing::process, Transaction}};
 
 
 pub fn update(screen: &mut NewTransactionScreen, input: &Input, sender: Sender<Event>)->Result<(), Box<(dyn Error)>>{
@@ -17,25 +16,55 @@ pub fn update(screen: &mut NewTransactionScreen, input: &Input, sender: Sender<E
             focus_on(new_focus, screen);
         },
         Input { key: Key::Esc, .. }=>{
-            match &screen.parent {
-                NewTransactionParent::DateList(e) => {
-                    sender.send(Event::ChangeAppState(crate::app::AppState::DateList(e.clone())))?;
+            match screen.error {
+                Some(_)=>{
+                    screen.error = None;
                 },
-                NewTransactionParent::TransactionsList(e) => {
-                    sender.send(Event::ChangeAppState(crate::app::AppState::TransactionsList(e.clone())))?;
-                },
+                None=>{
+                    send_exit_event(screen, sender)?;
+                }
             }
         },
         Input { key: Key::Enter, ..} =>{
             let description: String = screen.description_text_area.lines().first().unwrap().to_string();
+            let amount: String = screen.amount_text_area.lines().first().unwrap().to_string();
             let date: String = screen.date_text_area.lines().first().unwrap().to_string();
             let date_timestamp = date_to_timestamp(date.clone());
-            if let Ok(_timestamp) = date_timestamp {
-                if !description.is_empty(){
-                    //let transaction = Transaction::new(amount, category_id, description, date)
+
+            match date_timestamp {
+                Ok(timestamp) => {
+                    if !description.is_empty() {
+                        //let transaction = Transaction::new(amount, category_id, description, date)
+                        if !amount.is_empty() && matches!(date_timestamp,Ok(_)) {
+                            //let transaction = Transaction::new(amount, category_id, description, date)
+                            let amount_parsed = amount.parse::<f64>();
+                            if let Ok(amount) = amount_parsed {
+                                match &mut screen.parent {
+                                    NewTransactionParent::DateList(e) => {
+                                        create_transaction(amount, description, timestamp, e.category.category_id)?;
+                                        e.update_dates()?;
+                                    },
+                                    NewTransactionParent::TransactionsList(e) => {
+                                        e.update_transactions()?;
+                                        create_transaction(amount, description, timestamp, e.category.category_id)?;
+                                    },
+                                };
+                                send_exit_event(screen, sender)?;
+
+                            }else{
+                                screen.error = Some(String::from("Transaction amount is invalid.\nUsage example: 1220.0"));
+                            }
+                        }else{
+                            screen.error = Some(String::from("Transaction amount should'nt be empty"));
+                        }
+                    }else{
+                        screen.error = Some(String::from("Transaction description should'nt be empty"));
+                    }
+                },
+                Err(e)=>{
+                    screen.error = Some(format!("Invalid date.\n{}", e.to_string()));
                 }
             }
-
         },
         e=>{
             match screen.focus {
@@ -56,8 +85,31 @@ pub fn update(screen: &mut NewTransactionScreen, input: &Input, sender: Sender<E
     Ok(())
 }
 
+pub fn send_exit_event(screen: &mut NewTransactionScreen, sender: Sender<Event>)->Result<(), Box<(dyn Error)>>{
+    match &screen.parent {
+        NewTransactionParent::DateList(e) => {
+            sender.send(Event::ChangeAppState(crate::app::AppState::DateList(e.clone())))?;
+        },
+        NewTransactionParent::TransactionsList(e) => {
+            sender.send(Event::ChangeAppState(crate::app::AppState::TransactionsList(e.clone())))?;
+        },
+    }
+    Ok(())
+}
+
+pub fn create_transaction(amount: f64, description: String, timestamp: i64,category_id: u32)->Result<(), Box<(dyn Error)>>{
+    let transaction = Transaction::new(amount, category_id, description, Some(timestamp))?;
+    process(crate::manager::BudgetCommand::CreateTransaction(transaction))?;
+    Ok(())
+}
+
 pub fn date_to_timestamp(date: String) -> Result<i64, Box<(dyn Error)>>{
-    Ok(chrono::DateTime::<Utc>::from_str(&date)?.timestamp_millis())
+    let format_str = "%d/%m/%Y";
+    let datetime = chrono::NaiveDate::parse_from_str(&date, format_str)?;
+    
+    let datetime = datetime.and_hms_opt(0, 0, 0).unwrap();
+
+    Ok(datetime.timestamp_millis())
 }
 pub fn unfocus_all(screen: &mut NewTransactionScreen,){
     screen.date_text_area = App::get_new_text_area("Date separated by /", screen.date_text_area.lines().first().unwrap());

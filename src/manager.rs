@@ -1,7 +1,7 @@
-use std::{error::Error, fmt::Display, fs::{create_dir, File}, str::FromStr, time::{Instant, UNIX_EPOCH}};
+use std::{error::Error, fmt::Display, fs::{create_dir, File}, time::{Instant, UNIX_EPOCH}};
 
 
-use chrono::{DateTime, Utc};
+
 use rusqlite::{Connection, Row};
 
 use self::command_processing::{get_new_category_id, get_new_transaction_id};
@@ -145,19 +145,17 @@ impl Transaction {
         Some(datetime?.format("%e %b %Y").to_string())
     }
 
-    pub fn new(amount: f64, category_id: u32, description: String, date: Option<String>) -> Result<Self, Box<(dyn Error)>>{
+    pub fn new(amount: f64, category_id: u32, description: String, date: Option<i64>) -> Result<Self, Box<(dyn Error)>>{
         let id = get_new_transaction_id()?;
         match date {
             Some(e) => {
-                let datetime: DateTime<Utc> = chrono::DateTime::from_str(&e)?;
-
                 Ok(
                     Self { 
                         id: id,
                         amount: amount,
                         category_id: category_id,
                         description: description,
-                        timestamp: datetime.timestamp_millis()
+                        timestamp: e
                     }
                 )
             },

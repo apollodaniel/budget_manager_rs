@@ -62,6 +62,12 @@ impl DateListScreen {
         return Some(self.date_search[selected].clone());  
     }
 
+    pub fn update_dates(&mut self)->Result<(), Box<(dyn Error)>>{
+        let transactions = Self::get_transactions_hashmaps(&self.category)?;
+        self.date_search = transactions.keys().map(|f|f.clone()).collect();
+        Ok(())
+    }
+
     pub fn transaction_list_to_date_hashmap(transactions: Vec<Transaction>)->Option<HashMap<String, Vec<Transaction>>>{
         
         let mut transactions_hashmap: HashMap<String, Vec<Transaction>> = HashMap::new();

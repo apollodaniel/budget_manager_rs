@@ -11,7 +11,10 @@ pub type CrosstermTerminal = Terminal<CrosstermBackend<Stdout>>;
 pub enum Event{
     Tick,
     Key(Input),
-    ChangeAppState(AppState)
+    ChangeAppState(AppState),
+    UpdateTransactions,
+    UpdateCategories,
+    UpdateAll
 }
 
 pub struct EventHandler{

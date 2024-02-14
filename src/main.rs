@@ -30,7 +30,8 @@ fn main() -> Result<(), Box<(dyn Error)>> {
             Event::Tick => draw(&mut tui.terminal, &mut app)?,
             Event::ChangeAppState(app_state)=>{
                 app.change_app_state(app_state);
-            }
+            },
+            _=>{}
         }
     }
 
