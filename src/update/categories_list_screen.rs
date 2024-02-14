@@ -2,7 +2,7 @@ use std::{error::Error, sync::mpsc::Sender};
 
 use tui_textarea::{Input, Key};
 
-use crate::{app::{categories_list::CategoryListScreen, date_list::DateListScreen, ListScreen, ListingState, MoveListSelection}, events::Event, manager::{command_processing::process, Category}};
+use crate::{app::{categories_list::CategoryListScreen, date_list::DateListScreen, ListScreen, ListingState, MoveListSelection}, events::Event, manager::{command_processing::{list_transaction, process}, Category}};
 
 
 
@@ -33,6 +33,14 @@ pub fn update(screen: &mut CategoryListScreen, input: &Input, sender: Sender<Eve
                 Input { key: Key::Char('d'), ctrl: true, ..} => {
                     let selected_category = screen.get_selected_category();
                     if let Some(category) = selected_category {
+                        // delete associated transactions
+                        let transactions = list_transaction()?;
+                        transactions.iter().for_each(|f| {
+                            if f.category_id == category.category_id{
+                                process(crate::manager::BudgetCommand::DeleteTransaction(f.clone())).expect("unable to delete transaction");
+                            }
+                        });
+                        // delete category
                         process(crate::manager::BudgetCommand::DeleteCategory(category))?;
                         screen.update_categories()?;
                     }
