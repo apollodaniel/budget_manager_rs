@@ -92,7 +92,9 @@ impl CategoryListScreen{
 impl MoveListSelection<Category> for CategoryListScreen {
     
     fn move_list_selection(&mut self, move_selection: MoveSelection) {
-        Self::move_list_selection_logic(move_selection,&mut self.categories_list_state, &self.categories);   
+        if !self.categories_search.is_empty(){
+            Self::move_list_selection_logic(move_selection,&mut self.categories_list_state, &self.categories);   
+        }
     }
 }
 

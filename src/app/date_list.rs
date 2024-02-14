@@ -97,7 +97,9 @@ impl DateListScreen {
 
 impl MoveListSelection<String> for DateListScreen {
     fn move_list_selection(&mut self, move_selection: super::MoveSelection) {
-        Self::move_list_selection_logic(move_selection,&mut self.date_list_state, &self.date_search)
+        if !self.date_search.is_empty(){
+            Self::move_list_selection_logic(move_selection,&mut self.date_list_state, &self.date_search)
+        }
     }
 }
 

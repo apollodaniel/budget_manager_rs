@@ -98,7 +98,9 @@ impl TransactionListScreen{
 impl MoveListSelection<Transaction> for TransactionListScreen {
     
     fn move_list_selection(&mut self, move_selection: MoveSelection) {
-        Self::move_list_selection_logic(move_selection,&mut self.transactions_list_state, &self.transactions);   
+        if !self.transactions_search.is_empty(){
+            Self::move_list_selection_logic(move_selection,&mut self.transactions_list_state, &self.transactions);   
+        }
     }
 }
 
