@@ -6,7 +6,7 @@ use tui_textarea::TextArea;
 
 use super::{transactions_list::TransactionHashmapValueError, App, ListScreen, ListingState, MoveListSelection};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct DateListScreen{
     pub date_list_state: ListState,
     pub listing_state: ListingState,
@@ -47,8 +47,8 @@ impl DateListScreen {
         let transactions = Self::get_transactions_hashmaps(&category)?;
 
         Ok(Self { 
-            search_text_area: App::get_new_text_area("Search"),
-            add_text_area: App::get_new_text_area("Add"),
+            search_text_area: App::get_new_focused_text_area("Search",""),
+            add_text_area: App::get_new_focused_text_area("Add",""),
             listing_state: ListingState::List,
             date_search: transactions.keys().map(|f|f.clone()).collect::<Vec<String>>(),
             transactions: transactions,

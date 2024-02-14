@@ -26,8 +26,8 @@ impl CategoryListScreen{
         let categories = list_categories()?;
 
         Ok(Self { 
-            search_text_area: App::get_new_text_area("Search"),
-            add_text_area: App::get_new_text_area("Add"),
+            search_text_area: App::get_new_focused_text_area("Search",""),
+            add_text_area: App::get_new_focused_text_area("Add",""),
             categories_search: categories.clone(),
             categories_list_state: App::create_list_state(0),
             categories: categories,
@@ -48,8 +48,8 @@ impl CategoryListScreen{
         }
 
         Ok(Self { 
-            search_text_area: App::get_new_text_area("Search"),
-            add_text_area: App::get_new_text_area("Add"),
+            search_text_area: App::get_new_focused_text_area("Search",""),
+            add_text_area: App::get_new_focused_text_area("Add",""),
             categories_search: categories.clone(),
             categories_list_state: App::create_list_state(index),
             categories: categories,

@@ -1,5 +1,6 @@
 pub mod categories_list_screen;
 pub mod date_list_screen;
+pub mod new_transaction_screen;
 
 use std::error::Error;
 
@@ -11,6 +12,7 @@ pub fn draw(terminal: &mut CrosstermTerminal, app: &mut App)->Result<(), Box<(dy
     match &mut app.app_state {
         crate::app::AppState::CategoriesList(e) => categories_list_screen::draw(e,terminal)?,
         crate::app::AppState::DateList(e) => date_list_screen::draw(e,terminal)?,
+        crate::app::AppState::NewTransaction(e) => new_transaction_screen::draw(e,terminal)?,
         //crate::app::AppState::DateList(_) => draw_date_list(app,terminal)?,
         _=>{}
     }

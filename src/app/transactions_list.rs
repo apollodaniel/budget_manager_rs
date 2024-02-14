@@ -4,7 +4,7 @@ use std::error::Error;
 use ratatui::widgets::ListState;
 use tui_textarea::TextArea;
 use crate::manager::{command_processing::list_transaction, Category, Transaction};
-use super::{App, date_list::DateListScreen, ListingState};
+use super::{date_list::DateListScreen, App, ListingState};
 
 
 #[derive(Debug)]
@@ -20,7 +20,7 @@ impl fmt::Display for TransactionHashmapValueError {
 
 impl Error for TransactionHashmapValueError {}
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct TransactionListScreen{
     pub search_text_area: TextArea<'static>,
     pub listing_state: ListingState,
@@ -40,8 +40,8 @@ impl TransactionListScreen{
         let transactions = Self::get_transactions(&category, &date)?;
         
         Ok(Self { 
-            search_text_area: App::get_new_text_area("Search"),
-            add_text_area: App::get_new_text_area("Add"),
+            search_text_area: App::get_new_focused_text_area("Search",""),
+            add_text_area: App::get_new_focused_text_area("Add",""),
             transactions_search: transactions.clone(),
             transactions_list_state: App::create_list_state(0),
             transactions: transactions,

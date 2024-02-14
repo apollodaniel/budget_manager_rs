@@ -1,6 +1,7 @@
-use std::{error::Error, fs::{create_dir, File}, time::UNIX_EPOCH};
+use std::{error::Error, fmt::Display, fs::{create_dir, File}, str::FromStr, time::{Instant, UNIX_EPOCH}};
 
 
+use chrono::{DateTime, Utc};
 use rusqlite::{Connection, Row};
 
 use self::command_processing::{get_new_category_id, get_new_transaction_id};
@@ -105,13 +106,27 @@ pub mod command_processing{
     }
 }
 
+
+#[derive(Debug)]
+pub struct InstantSubError{
+    message: String
+}
+
+impl Display for InstantSubError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.message)
+    }
+}
+
+impl Error for InstantSubError {}
+
 #[derive(Debug, Clone)]
 pub struct Transaction{
     pub id: u32,
     pub amount: f64,
     pub category_id: u32,
     pub description: String,
-    timestamp: i64,
+    pub timestamp: i64,
 }
 
 impl Transaction {
@@ -130,9 +145,34 @@ impl Transaction {
         Some(datetime?.format("%e %b %Y").to_string())
     }
 
-    pub fn new(amount: f64, category_id: u32, description: String) -> Result<Self, Box<(dyn Error)>>{
+    pub fn new(amount: f64, category_id: u32, description: String, date: Option<String>) -> Result<Self, Box<(dyn Error)>>{
         let id = get_new_transaction_id()?;
-        Ok(Self { id: id, amount: amount, category_id: category_id, description: description, timestamp: UNIX_EPOCH.elapsed()?.as_secs() as i64})
+        match date {
+            Some(e) => {
+                let datetime: DateTime<Utc> = chrono::DateTime::from_str(&e)?;
+
+                Ok(
+                    Self { 
+                        id: id,
+                        amount: amount,
+                        category_id: category_id,
+                        description: description,
+                        timestamp: datetime.timestamp_millis()
+                    }
+                )
+            },
+            None =>{
+                let error = InstantSubError{message: "unable to get current time".to_string()};
+                Ok(Self { 
+                    id: id,
+                    amount: amount,
+                    category_id: category_id,
+                    description: description,
+                    timestamp: Instant::now().checked_sub(UNIX_EPOCH.elapsed()?).ok_or(error)?.elapsed().as_secs() as i64
+                })
+
+            }
+        }
     }
 
     fn to_sql_insert(&self) -> String{

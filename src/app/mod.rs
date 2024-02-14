@@ -1,16 +1,17 @@
 use std::error::Error;
 
 
-use ratatui::widgets::{Block, Borders, ListState};
+use ratatui::{style::{Style, Stylize}, text, widgets::{Block, Borders, ListState, Padding}};
 use tui_textarea::TextArea;
 
 use crate::manager::{Category, Transaction};
 
-use self::{categories_list::CategoryListScreen, date_list::DateListScreen, transactions_list::TransactionListScreen};
+use self::{categories_list::CategoryListScreen, date_list::DateListScreen, transactions_list::TransactionListScreen, NewTransaction::NewTransactionScreen};
 
 pub mod categories_list;
 pub mod date_list;
 pub mod transactions_list;
+pub mod NewTransaction;
 
 
 #[derive(Debug)]
@@ -19,12 +20,12 @@ pub enum AppState{
     DateList(DateListScreen),
     TransactionsList(TransactionListScreen),
     ChangeCategory(Transaction),
-    NewTransaction(Category),
+    NewTransaction(NewTransactionScreen),
     NewCategory,
     
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum ListingState{
     List,
     Search,
@@ -114,10 +115,20 @@ impl App {
         self.app_state = state;
     }
 
-    fn get_new_text_area<'b>(label: &'b str)->TextArea<'b>{
-        let text_area_block = Block::new().title(label).borders(Borders::all());
+    pub fn get_new_text_area<'b>(label: &'b str, input: &str)->TextArea<'b>{
+        let text_area_block = Block::new().title(label).borders(Borders::ALL).border_type(ratatui::widgets::BorderType::Plain);
+        let mut text_area = TextArea::default();
+        text_area.set_cursor_style(Style::new().black());
+        text_area.set_block(text_area_block);
+        text_area.insert_str(input);
+        text_area
+    }
+
+    pub fn get_new_focused_text_area<'b>(label: &'b str, input: &str)->TextArea<'b>{
+        let text_area_block = Block::new().title(label).white().borders(Borders::all()).border_type(ratatui::widgets::BorderType::Thick);
         let mut text_area = TextArea::default();
         text_area.set_block(text_area_block);
+        text_area.insert_str(input);
         text_area
     }
 
