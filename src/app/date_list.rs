@@ -74,7 +74,7 @@ impl DateListScreen {
 
     pub fn get_selected_date(&self) -> Option<String>{
         let selected = self.date_list_state.selected()?;
-        return Some(self.date_search[selected].clone());  
+        return Some(self.date_search.get(selected)?.clone());  
     }
 
     pub fn update_dates(&mut self)->Result<(), Box<(dyn Error)>>{

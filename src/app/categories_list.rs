@@ -72,20 +72,16 @@ impl CategoryListScreen{
 
     pub fn get_selected_category(&self) -> Option<Category>{
         let selected = self.categories_list_state.selected();
-        if let Some(selected) = selected {
-            let id = self.categories_search[selected].category_id;
-
-            let mut category: Option<Category> = None;
-            for _category in &self.categories{
-                if _category.category_id == id{
-                    category = Some(_category.clone());
-                    break;
-                }
+        let id = self.categories_search.get(selected?)?.category_id;
+        
+        let mut category: Option<Category> = None;
+        for _category in &self.categories{
+            if _category.category_id == id{
+                category = Some(_category.clone());
+                break;
             }
-            return category;  
-        }else{
-            return None;
         }
+        return category;  
     }
 }
 

@@ -1,7 +1,8 @@
 use std::{error::Error, fmt::Display, sync::mpsc::Sender};
 
 use tui_textarea::{Input, Key};
-
+use crate::manager::command_processing::process;
+use crate::manager::Transaction;
 use crate::{app::{date_list::DateListScreen, new_transaction::{NewTransactionParent, NewTransactionScreen}, transactions_list::TransactionListScreen, ListScreen, ListingState, MoveListSelection}, events::Event};
 
 
@@ -38,7 +39,16 @@ pub fn update(screen: &mut DateListScreen, input: &Input, sender: Sender<Event>)
                 },
                 Input { key: Key::Char('d'), ctrl: true, ..} => {
                     // loop for all transactions of this date and delete
-
+                    let selected = screen.get_selected_date();              
+                    if let Some(date) = selected {
+                        let transactions: &Vec<Transaction> = &screen.transactions[&date];
+                        
+                        transactions.iter().for_each(|f|{
+                            process(crate::manager::BudgetCommand::DeleteTransaction(f.clone())).expect("unable to delete transaction");
+                        });
+                        
+                        screen.update_dates()?;
+                    }
                 },
                 Input { key: Key::Enter, .. }=>{
                     // screen.change_listing_state(ListingState::List)
