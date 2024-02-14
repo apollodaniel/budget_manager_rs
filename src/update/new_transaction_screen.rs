@@ -8,11 +8,19 @@ pub fn update(screen: &mut NewTransactionScreen, input: &Input, sender: Sender<E
     
     match input {
         Input { key: Key::Up, .. } =>{
-            let new_focus = NewTransactionScreenFocus::get_new_focus(screen.focus.clone(), crate::app::MoveSelection::Up);
+            let new_focus = NewTransactionScreenFocus::get_new_focus(
+                screen.focus.clone(),
+                crate::app::MoveSelection::Up,
+                screen.check_contains_date()
+            );
             focus_on(new_focus, screen);
         },
         Input { key: Key::Down, .. } =>{
-            let new_focus = NewTransactionScreenFocus::get_new_focus(screen.focus.clone(), crate::app::MoveSelection::Down);
+            let new_focus = NewTransactionScreenFocus::get_new_focus(
+                screen.focus.clone(),
+                crate::app::MoveSelection::Down,
+                screen.check_contains_date()
+            );
             focus_on(new_focus, screen);
         },
         Input { key: Key::Esc, .. }=>{
@@ -28,7 +36,8 @@ pub fn update(screen: &mut NewTransactionScreen, input: &Input, sender: Sender<E
         Input { key: Key::Enter, ..} =>{
             let description: String = screen.description_text_area.lines().first().unwrap().to_string();
             let amount: String = screen.amount_text_area.lines().first().unwrap().to_string();
-            let date: String = screen.date_text_area.lines().first().unwrap().to_string();
+            let date: String = if let Some(date) = screen.date.clone() {date}else{screen.date_text_area.lines().first().unwrap().to_string()};
+
             let date_timestamp = date_to_timestamp(date.clone());
 
             match date_timestamp {
@@ -45,8 +54,8 @@ pub fn update(screen: &mut NewTransactionScreen, input: &Input, sender: Sender<E
                                         e.update_dates()?;
                                     },
                                     NewTransactionParent::TransactionsList(e) => {
-                                        e.update_transactions()?;
                                         create_transaction(amount, description, timestamp, e.category.category_id)?;
+                                        e.update_transactions()?;
                                     },
                                 };
                                 send_exit_event(screen, sender)?;
@@ -62,7 +71,7 @@ pub fn update(screen: &mut NewTransactionScreen, input: &Input, sender: Sender<E
                     }
                 },
                 Err(e)=>{
-                    screen.error = Some(format!("Invalid date.\n{}", e.to_string()));
+                    screen.error = Some(format!("Invalid date: {}.\n{}", date, e.to_string()));
                 }
             }
         },
@@ -105,7 +114,14 @@ pub fn create_transaction(amount: f64, description: String, timestamp: i64,categ
 
 pub fn date_to_timestamp(date: String) -> Result<i64, Box<(dyn Error)>>{
     let format_str = "%d/%m/%Y";
-    let datetime = chrono::NaiveDate::parse_from_str(&date, format_str)?;
+    let named_format_str = "%e %b %Y";
+
+    let datetime = chrono::NaiveDate::parse_from_str(&date, format_str);
+    
+    let datetime = match datetime {
+        Ok(e) => {e},
+        Err(_) => chrono::NaiveDate::parse_from_str(&date, named_format_str)?
+    };
     
     let datetime = datetime.and_hms_opt(0, 0, 0).unwrap();
 

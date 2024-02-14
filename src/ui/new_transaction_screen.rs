@@ -39,7 +39,10 @@ pub fn draw(screen: &mut NewTransactionScreen, terminal: &mut CrosstermTerminal)
     
             f.render_widget(screen.description_text_area.widget(), layout[1]);
             f.render_widget(screen.amount_text_area.widget(), layout[2]);
-            f.render_widget(screen.date_text_area.widget(), layout[3]);
+
+            if let None = screen.date {
+                f.render_widget(screen.date_text_area.widget(), layout[3]);
+            }
         }
     })?;
 

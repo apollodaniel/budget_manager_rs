@@ -2,7 +2,7 @@ use std::{error::Error, sync::mpsc::Sender};
 
 use tui_textarea::{Input, Key};
 
-use crate::{app::{date_list::DateListScreen, transactions_list::TransactionListScreen, ListScreen, ListingState, MoveListSelection}, events::Event, manager::{command_processing::process, Category}};
+use crate::{app::{date_list::DateListScreen, new_transaction::{NewTransactionParent, NewTransactionScreen}, transactions_list::TransactionListScreen, ListScreen, ListingState, MoveListSelection}, events::Event, manager::{command_processing::process, Category}};
 
 
 
@@ -30,7 +30,17 @@ pub fn update(screen: &mut TransactionListScreen, input: &Input, sender: Sender<
                     
                 },
                 Input { key: Key::Char('a'), ctrl: true, ..} => {
-                    screen.change_listing_state(ListingState::Add);
+                    //screen.change_listing_state(ListingState::Add);
+                    sender.send(
+                        Event::ChangeAppState(
+                            crate::app::AppState::NewTransaction(
+                                NewTransactionScreen::new(
+                                NewTransactionParent::TransactionsList(screen.clone()),
+                                    Some(screen.current_date.clone())
+                                )
+                            )
+                        )
+                    )?;
                 },
                 Input { key: Key::Char('f'), ctrl: true, ..} => {
                     screen.change_listing_state(ListingState::Search);

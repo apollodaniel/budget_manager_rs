@@ -11,24 +11,31 @@ pub enum NewTransactionScreenFocus{
     DateInput
 }
 impl NewTransactionScreenFocus {
-    pub fn get_new_focus(focus: NewTransactionScreenFocus,move_selection: MoveSelection)->NewTransactionScreenFocus{
-        let new_focus = match move_selection {
-            MoveSelection::Down => {
-                match focus {
-                    NewTransactionScreenFocus::DescriptionInput => Self::AmountInput,
-                    NewTransactionScreenFocus::AmountInput => Self::DateInput,
-                    NewTransactionScreenFocus::DateInput => Self::DescriptionInput,
-                }
-            },
-            MoveSelection::Up => {
-                match focus {
-                    NewTransactionScreenFocus::DescriptionInput => Self::DateInput,
-                    NewTransactionScreenFocus::AmountInput => Self::DescriptionInput,
-                    NewTransactionScreenFocus::DateInput => Self::AmountInput,
+    pub fn get_new_focus(focus: NewTransactionScreenFocus,move_selection: MoveSelection, contains_date: bool)->NewTransactionScreenFocus{
+        if !contains_date{
+            match move_selection {
+                MoveSelection::Down => {
+                    match focus {
+                        NewTransactionScreenFocus::DescriptionInput => Self::AmountInput,
+                        NewTransactionScreenFocus::AmountInput => Self::DateInput,
+                        NewTransactionScreenFocus::DateInput => Self::DescriptionInput,
+                    }
+                },
+                MoveSelection::Up => {
+                    match focus {
+                        NewTransactionScreenFocus::DescriptionInput => Self::DateInput,
+                        NewTransactionScreenFocus::AmountInput => Self::DescriptionInput,
+                        NewTransactionScreenFocus::DateInput => Self::AmountInput,
+                    }
                 }
             }
-        };
-        new_focus
+        }else{
+            match focus {
+                NewTransactionScreenFocus::DescriptionInput => Self::AmountInput,
+                NewTransactionScreenFocus::AmountInput => Self::DescriptionInput,
+                NewTransactionScreenFocus::DateInput => Self::DescriptionInput,
+            }
+        }
     }
 }
 
@@ -49,6 +56,13 @@ pub struct NewTransactionScreen{
 }
 
 impl NewTransactionScreen {
+
+    pub fn check_contains_date(&self)->bool{
+        match self.date {
+            Some(_)=>true,
+            None=>false
+        }
+    }
     pub fn new(parent: NewTransactionParent,date: Option<String>)->Self{
         Self {error: None,parent: parent,focus: NewTransactionScreenFocus::DescriptionInput, description_text_area: App::get_new_focused_text_area("Description", ""), amount_text_area: App::get_new_text_area("Amount", "") ,date_text_area: App::get_new_text_area("Date separated by /", ""), date: date }
     }
