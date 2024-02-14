@@ -2,7 +2,7 @@ use std::{error::Error, sync::mpsc::Sender};
 
 use tui_textarea::{Input, Key};
 
-use crate::{app::{date_list::DateListScreen, ListScreen, ListingState, MoveListSelection, NewTransaction::{NewTransactionParent, NewTransactionScreen}}, events::Event};
+use crate::{app::{date_list::DateListScreen, ListScreen, ListingState, MoveListSelection, new_transaction::{NewTransactionParent, NewTransactionScreen}}, events::Event};
 
 
 

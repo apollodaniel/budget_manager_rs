@@ -1,17 +1,17 @@
 use std::error::Error;
 
 
-use ratatui::{style::{Style, Stylize}, text, widgets::{Block, Borders, ListState, Padding}};
+use ratatui::{style::{Style, Stylize}, widgets::{Block, Borders, ListState}};
 use tui_textarea::TextArea;
 
-use crate::manager::{Category, Transaction};
+use crate::manager::Transaction;
 
-use self::{categories_list::CategoryListScreen, date_list::DateListScreen, transactions_list::TransactionListScreen, NewTransaction::NewTransactionScreen};
+use self::{categories_list::CategoryListScreen, date_list::DateListScreen, transactions_list::TransactionListScreen, new_transaction::NewTransactionScreen};
 
 pub mod categories_list;
 pub mod date_list;
 pub mod transactions_list;
-pub mod NewTransaction;
+pub mod new_transaction;
 
 
 #[derive(Debug)]
