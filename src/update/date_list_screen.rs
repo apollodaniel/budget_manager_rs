@@ -42,13 +42,15 @@ pub fn update(screen: &mut DateListScreen, input: &Input, sender: Sender<Event>)
                 },
                 Input { key: Key::Enter, .. }=>{
                     // screen.change_listing_state(ListingState::List)
-                    sender.send(
-                        Event::ChangeAppState(
-                            crate::app::AppState::TransactionsList(
-                                TransactionListScreen::new(&screen.category, &screen.get_selected_date().ok_or(InvalidSelectionError)?)?
+                    if !screen.date_search.is_empty(){
+                        sender.send(
+                            Event::ChangeAppState(
+                                crate::app::AppState::TransactionsList(
+                                    TransactionListScreen::new(&screen.category, &screen.get_selected_date().ok_or(InvalidSelectionError)?)?
+                                )
                             )
-                        )
-                    )?;
+                        )?;
+                    }
                 },
                 _=>{}
             }

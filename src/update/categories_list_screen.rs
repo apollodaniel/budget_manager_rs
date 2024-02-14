@@ -20,8 +20,10 @@ pub fn update(screen: &mut CategoryListScreen, input: &Input, sender: Sender<Eve
                 Input { key: Key::Up, .. }=> screen.move_list_selection(crate::app::MoveSelection::Up),
                 Input { key: Key::Down, .. }=>screen.move_list_selection(crate::app::MoveSelection::Down),
                 Input { key: Key::Enter,.. } => {
-                    if let Some(t) = screen.get_selected_category() {
-                        sender.send(Event::ChangeAppState(crate::app::AppState::DateList(DateListScreen::new(t)?)))?;
+                    if !screen.categories_search.is_empty(){
+                        if let Some(t) = screen.get_selected_category() {
+                            sender.send(Event::ChangeAppState(crate::app::AppState::DateList(DateListScreen::new(t)?)))?;
+                        }
                     }
                 },
                 Input { key: Key::Char('a'), ctrl: true, ..} => {
