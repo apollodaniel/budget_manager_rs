@@ -29,13 +29,25 @@ impl EventHandler {
 
         // key & tick events
         {
+
+            let tick_sender = sender.clone();
+            thread::spawn(move ||{
+                let mut last_time = Instant::now();
+                let tick_rate = tick_rate/3;
+                loop {
+                    if last_time.elapsed() >= tick_rate{
+                        last_time = Instant::now();
+                        tick_sender.send(Event::Tick).expect("unable to send tick event");
+                    }
+                }
+            });
+            
             let sender = sender.clone();
             thread::spawn(move||{
                 let mut last_time = Instant::now();
                 loop {
                     let timeout = tick_rate.checked_sub(last_time.elapsed()).unwrap_or(tick_rate);
                 
-                    sender.send(Event::Tick).expect("unable to send tick event");
                     if event::poll(timeout).expect("unable to pool events"){
                         if let crossterm::event::Event::Key(e) = event::read().expect("unable to read events"){
                             sender.send(Event::Key(e.into())).expect("unable to send key event");
