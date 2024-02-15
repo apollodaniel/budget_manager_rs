@@ -65,7 +65,15 @@ impl NewTransactionScreen {
         }
     }
     pub fn new(parent: ParentScreen,date: Option<String>)->Self{
-        Self {error: None,parent: parent,focus: NewTransactionScreenFocus::DescriptionInput, description_text_area: App::get_new_focused_text_area("Description", ""), amount_text_area: App::get_new_text_area("Amount", "") ,date_text_area: App::get_new_text_area("Date separated by /", ""), date: date }
+        Self {
+            error: None,
+            parent: parent,
+            focus: NewTransactionScreenFocus::DescriptionInput,
+            description_text_area: App::get_new_focused_text_area("Descrição", ""),
+            amount_text_area: App::get_new_text_area("Valor", ""),
+            date_text_area: App::get_new_text_area("Data dd/mm/yyyy", ""),
+            date: date
+        }
     }
 }
 

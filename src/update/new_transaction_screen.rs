@@ -61,17 +61,17 @@ pub fn update(screen: &mut NewTransactionScreen, input: &Input, sender: Sender<E
                                 send_exit_event(screen, sender)?;
 
                             }else{
-                                screen.error = Some(String::from("Transaction amount is invalid.\nUsage example: 1220.0"));
+                                screen.error = Some(String::from("Valor inválido.\nTente algo como: 1220.0"));
                             }
                         }else{
-                            screen.error = Some(String::from("Transaction amount should'nt be empty"));
+                            screen.error = Some(String::from("O valor da transação não pode estar vázio"));
                         }
                     }else{
-                        screen.error = Some(String::from("Transaction description should'nt be empty"));
+                        screen.error = Some(String::from("A descrição não pode estar vázia"));
                     }
                 },
                 Err(e)=>{
-                    screen.error = Some(format!("Invalid date: {}.\n{}", date, e.to_string()));
+                    screen.error = Some(format!("Data inválida: {}.\n{}", date, e.to_string()));
                 }
             }
         },
@@ -128,22 +128,22 @@ pub fn date_to_timestamp(date: String) -> Result<i64, Box<(dyn Error)>>{
     Ok(datetime.timestamp_millis())
 }
 pub fn unfocus_all(screen: &mut NewTransactionScreen,){
-    screen.date_text_area = App::get_new_text_area("Date separated by /", screen.date_text_area.lines().first().unwrap());
-    screen.description_text_area = App::get_new_text_area("Description", screen.description_text_area.lines().first().unwrap());
-    screen.amount_text_area = App::get_new_text_area("Amount", screen.amount_text_area.lines().first().unwrap());
+    screen.date_text_area = App::get_new_text_area("Data dd/mm/yyyy", screen.date_text_area.lines().first().unwrap());
+    screen.description_text_area = App::get_new_text_area("Descrição", screen.description_text_area.lines().first().unwrap());
+    screen.amount_text_area = App::get_new_text_area("Valor", screen.amount_text_area.lines().first().unwrap());
 }
 
 pub fn focus_on(focus: NewTransactionScreenFocus,screen: &mut NewTransactionScreen){
     unfocus_all(screen);
     match focus {
         NewTransactionScreenFocus::DescriptionInput=>{
-            screen.description_text_area = App::get_new_focused_text_area("Description", screen.description_text_area.lines().first().unwrap());
+            screen.description_text_area = App::get_new_focused_text_area("Descrição", screen.description_text_area.lines().first().unwrap());
         },
         NewTransactionScreenFocus::DateInput=>{
-            screen.date_text_area = App::get_new_focused_text_area("Date separated by /", screen.date_text_area.lines().first().unwrap());
+            screen.date_text_area = App::get_new_focused_text_area("Data dd/mm/yyyy", screen.date_text_area.lines().first().unwrap());
         },
         NewTransactionScreenFocus::AmountInput =>{
-            screen.amount_text_area = App::get_new_focused_text_area("Amount", screen.amount_text_area.lines().first().unwrap());
+            screen.amount_text_area = App::get_new_focused_text_area("Valor", screen.amount_text_area.lines().first().unwrap());
         }
     }
     screen.focus = focus;

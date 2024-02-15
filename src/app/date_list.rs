@@ -47,8 +47,8 @@ impl DateListScreen {
         let transactions = Self::get_transactions_hashmaps(&category)?;
 
         Ok(Self { 
-            search_text_area: App::get_new_focused_text_area("Search",""),
-            add_text_area: App::get_new_focused_text_area("Add",""),
+            search_text_area: App::get_new_focused_text_area("Procurar",""),
+            add_text_area: App::get_new_focused_text_area("Nova transação",""),
             listing_state: ListingState::List,
             date_search: transactions.keys().map(|f|f.clone()).collect::<Vec<String>>(),
             transactions: transactions,
@@ -62,8 +62,8 @@ impl DateListScreen {
         let date_search = transactions.keys().map(|f|f.clone()).collect::<Vec<String>>();
         let index = date_search.iter().position(|f| f==&date).unwrap_or(0);
         Ok(Self { 
-            search_text_area: App::get_new_focused_text_area("Search",""),
-            add_text_area: App::get_new_focused_text_area("Add",""),
+            search_text_area: App::get_new_focused_text_area("Procurar",""),
+            add_text_area: App::get_new_focused_text_area("Nova transação",""),
             listing_state: ListingState::List,
             date_search: date_search,
             transactions: transactions,

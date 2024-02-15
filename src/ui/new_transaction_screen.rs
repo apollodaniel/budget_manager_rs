@@ -6,7 +6,7 @@ use crate::{app::new_transaction::NewTransactionScreen, events::CrosstermTermina
 
 
 pub fn draw(screen: &mut NewTransactionScreen, terminal: &mut CrosstermTerminal)->Result<(), Box<(dyn Error)>>{
-    let block = Block::default().title("New transaction").title_alignment(ratatui::layout::Alignment::Center).borders(Borders::NONE);
+    let block = Block::default().title("Nova transação").title_alignment(ratatui::layout::Alignment::Center).borders(Borders::NONE);
 
     terminal.draw(|f|{        
         if let Some(error) = screen.error.clone() {

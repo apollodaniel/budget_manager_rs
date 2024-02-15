@@ -30,8 +30,8 @@ impl CategorySelectionScreen{
         let categories = list_categories()?;
 
         Ok(Self { 
-            search_text_area: App::get_new_focused_text_area("Search",""),
-            add_text_area: App::get_new_focused_text_area("Add",""),
+            search_text_area: App::get_new_focused_text_area("Procurar",""),
+            add_text_area: App::get_new_focused_text_area("Nova categoria",""),
             categories_search: categories.clone(),
             categories_list_state: App::create_list_state(0),
             categories: categories,

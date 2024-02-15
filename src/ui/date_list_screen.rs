@@ -6,7 +6,7 @@ use crate::{app::{self, date_list::DateListScreen}, events::CrosstermTerminal};
 
 
 pub fn draw(screen: &mut DateListScreen, terminal: &mut CrosstermTerminal)->Result<(), Box<(dyn Error)>>{
-    let block = Block::default().title("Date").borders(Borders::ALL);
+    let block = Block::default().title("Data").borders(Borders::ALL);
     let list = List::new(screen.date_search.clone())
         .block(block)
         .style(Style::default().fg(Color::White))

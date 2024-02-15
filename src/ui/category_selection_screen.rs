@@ -5,7 +5,7 @@ use ratatui::{layout::{Constraint, Layout}, style::{Color, Modifier, Style}, wid
 use crate::{app::{self, category_selection::CategorySelectionScreen}, events::CrosstermTerminal};
 
 pub fn draw(screen: &mut CategorySelectionScreen, terminal: &mut CrosstermTerminal)->Result<(), Box<(dyn Error)>>{
-        let block = Block::default().title("Select a category").borders(Borders::ALL);
+        let block = Block::default().title("Selecione uma categoria").borders(Borders::ALL);
         let list = List::new(screen.categories_search.iter().map(|f|f.name.clone()).collect::<Vec<String>>())
             .block(block)
             .style(Style::default().fg(Color::White))

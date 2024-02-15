@@ -7,7 +7,7 @@ use crate::{app::{self, transactions_list::TransactionListScreen}, events::Cross
 
 
 pub fn draw(screen: &mut TransactionListScreen, terminal: &mut CrosstermTerminal)->Result<(), Box<(dyn Error)>>{
-    let block = Block::default().title("Transactions").borders(Borders::ALL);
+    let block = Block::default().title("Transações").borders(Borders::ALL);
     let list = List::new(
         screen.transactions_search.iter().map(
             |f|format!(

@@ -40,8 +40,8 @@ impl TransactionListScreen{
         let transactions = Self::get_transactions(&category, &date)?;
         
         Ok(Self { 
-            search_text_area: App::get_new_focused_text_area("Search",""),
-            add_text_area: App::get_new_focused_text_area("Add",""),
+            search_text_area: App::get_new_focused_text_area("Procurar",""),
+            add_text_area: App::get_new_focused_text_area("Nova transação",""),
             transactions_search: transactions.clone(),
             transactions_list_state: App::create_list_state(0),
             transactions: transactions,
