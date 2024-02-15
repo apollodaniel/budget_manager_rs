@@ -12,6 +12,16 @@ pub fn update(screen: &mut CategorySelectionScreen, input: &Input, sender: Sende
         crate::app::ListingState::List => {
 
             match &input {
+                Input { key: Key::Esc, .. } =>{
+                    match &screen.parent {
+                        crate::app::new_transaction::ParentScreen::TransactionsList(e)=>{
+                            sender.send(Event::ChangeAppState(crate::app::AppState::TransactionsList(e.clone())))?;
+                        },
+                        crate::app::new_transaction::ParentScreen::DateList(e) => {
+                            sender.send(Event::ChangeAppState(crate::app::AppState::DateList(e.clone())))?;
+                        }
+                    }
+                }
                 Input { key: Key::Char('l'), ctrl: true, .. } => {
                     screen.clear_input();
                     screen.search_category();
