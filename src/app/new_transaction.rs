@@ -39,7 +39,8 @@ impl NewTransactionScreenFocus {
     }
 }
 
-pub enum NewTransactionParent{
+#[derive(Debug)]
+pub enum ParentScreen{
     DateList(DateListScreen),
     TransactionsList(TransactionListScreen)
 }
@@ -49,7 +50,7 @@ pub struct NewTransactionScreen{
     pub date_text_area: TextArea<'static>,
     pub amount_text_area: TextArea<'static>,
     pub focus: NewTransactionScreenFocus,
-    pub parent: NewTransactionParent,
+    pub parent: ParentScreen,
     pub error: Option<String>,
 
     pub date: Option<String>
@@ -63,7 +64,7 @@ impl NewTransactionScreen {
             None=>false
         }
     }
-    pub fn new(parent: NewTransactionParent,date: Option<String>)->Self{
+    pub fn new(parent: ParentScreen,date: Option<String>)->Self{
         Self {error: None,parent: parent,focus: NewTransactionScreenFocus::DescriptionInput, description_text_area: App::get_new_focused_text_area("Description", ""), amount_text_area: App::get_new_text_area("Amount", "") ,date_text_area: App::get_new_text_area("Date separated by /", ""), date: date }
     }
 }

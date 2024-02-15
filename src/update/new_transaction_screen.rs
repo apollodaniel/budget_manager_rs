@@ -1,7 +1,7 @@
 use std::{error::Error, sync::mpsc::Sender};
 use tui_textarea::{Input, Key};
 
-use crate::{app::{new_transaction::{NewTransactionParent, NewTransactionScreen, NewTransactionScreenFocus}, App}, events::Event, manager::{command_processing::process, Transaction}};
+use crate::{app::{new_transaction::{ParentScreen, NewTransactionScreen, NewTransactionScreenFocus}, App}, events::Event, manager::{command_processing::process, Transaction}};
 
 
 pub fn update(screen: &mut NewTransactionScreen, input: &Input, sender: Sender<Event>)->Result<(), Box<(dyn Error)>>{
@@ -49,11 +49,11 @@ pub fn update(screen: &mut NewTransactionScreen, input: &Input, sender: Sender<E
                             let amount_parsed = amount.parse::<f64>();
                             if let Ok(amount) = amount_parsed {
                                 match &mut screen.parent {
-                                    NewTransactionParent::DateList(e) => {
+                                    ParentScreen::DateList(e) => {
                                         create_transaction(amount, description, timestamp, e.category.category_id)?;
                                         e.update_dates()?;
                                     },
-                                    NewTransactionParent::TransactionsList(e) => {
+                                    ParentScreen::TransactionsList(e) => {
                                         create_transaction(amount, description, timestamp, e.category.category_id)?;
                                         e.update_transactions()?;
                                     },
@@ -96,10 +96,10 @@ pub fn update(screen: &mut NewTransactionScreen, input: &Input, sender: Sender<E
 
 pub fn send_exit_event(screen: &mut NewTransactionScreen, sender: Sender<Event>)->Result<(), Box<(dyn Error)>>{
     match &screen.parent {
-        NewTransactionParent::DateList(e) => {
+        ParentScreen::DateList(e) => {
             sender.send(Event::ChangeAppState(crate::app::AppState::DateList(e.clone())))?;
         },
-        NewTransactionParent::TransactionsList(e) => {
+        ParentScreen::TransactionsList(e) => {
             sender.send(Event::ChangeAppState(crate::app::AppState::TransactionsList(e.clone())))?;
         },
     }

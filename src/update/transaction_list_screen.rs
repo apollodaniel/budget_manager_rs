@@ -2,7 +2,7 @@ use std::{error::Error, sync::mpsc::Sender};
 
 use tui_textarea::{Input, Key};
 
-use crate::{app::{date_list::DateListScreen, new_transaction::{NewTransactionParent, NewTransactionScreen}, transactions_list::TransactionListScreen, ListScreen, ListingState, MoveListSelection}, events::Event, manager::{command_processing::process, Category}};
+use crate::{app::{category_selection::CategorySelectionScreen, date_list::DateListScreen, new_transaction::{ParentScreen, NewTransactionScreen}, transactions_list::TransactionListScreen, ListScreen, ListingState, MoveListSelection}, events::Event, manager::{command_processing::process, Category}};
 
 
 
@@ -35,7 +35,7 @@ pub fn update(screen: &mut TransactionListScreen, input: &Input, sender: Sender<
                         Event::ChangeAppState(
                             crate::app::AppState::NewTransaction(
                                 NewTransactionScreen::new(
-                                NewTransactionParent::TransactionsList(screen.clone()),
+                                ParentScreen::TransactionsList(screen.clone()),
                                     Some(screen.current_date.clone())
                                 )
                             )
@@ -44,6 +44,22 @@ pub fn update(screen: &mut TransactionListScreen, input: &Input, sender: Sender<
                 },
                 Input { key: Key::Char('f'), ctrl: true, ..} => {
                     screen.change_listing_state(ListingState::Search);
+                },
+                Input { key: Key::Char('c'), ctrl: true, ..} => {
+                    let selected_transaction = screen.get_selected_transaction();
+                    if let Some(transaction) = selected_transaction {
+                        
+                        sender.send(Event::ChangeAppState(
+                            crate::app::AppState::ChangeCategory(
+                                CategorySelectionScreen::new_with_selected(
+                                    screen.category.clone(),
+                                    vec![transaction.clone()],
+                                    ParentScreen::TransactionsList(screen.clone())
+                                )?
+                            ))
+                        )?;
+
+                    }
                 },
                 Input { key: Key::Char('d'), ctrl: true, ..} => {
                     let selected_transaction = screen.get_selected_transaction();

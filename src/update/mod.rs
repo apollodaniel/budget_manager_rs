@@ -8,6 +8,7 @@ pub mod categories_list_screen;
 pub mod date_list_screen;
 pub mod new_transaction_screen;
 pub mod transaction_list_screen;
+pub mod category_selection_screen;
 
 pub fn update(app: &mut App, input: &Input, sender: Sender<Event>)->Result<(), Box<(dyn Error)>>{
     match &input {
@@ -21,6 +22,7 @@ pub fn update(app: &mut App, input: &Input, sender: Sender<Event>)->Result<(), B
         crate::app::AppState::DateList(s) => date_list_screen::update(s,input, sender)?,
         crate::app::AppState::NewTransaction(s) => new_transaction_screen::update(s,input, sender)?,
         crate::app::AppState::TransactionsList(s) => transaction_list_screen::update(s,input, sender)?,
+        crate::app::AppState::ChangeCategory(s) => category_selection_screen::update(s,input, sender)?,
         //crate::app::AppState::DateList(c) => update_transactions_date_list(app,input, c.clone())?,
         _=>{}
     }

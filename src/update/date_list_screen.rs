@@ -1,9 +1,10 @@
 use std::{error::Error, fmt::Display, sync::mpsc::Sender};
 
 use tui_textarea::{Input, Key};
+use crate::app::category_selection::CategorySelectionScreen;
 use crate::manager::command_processing::process;
 use crate::manager::Transaction;
-use crate::{app::{date_list::DateListScreen, new_transaction::{NewTransactionParent, NewTransactionScreen}, transactions_list::TransactionListScreen, ListScreen, ListingState, MoveListSelection}, events::Event};
+use crate::{app::{date_list::DateListScreen, new_transaction::{ParentScreen, NewTransactionScreen}, transactions_list::TransactionListScreen, ListScreen, ListingState, MoveListSelection}, events::Event};
 
 
 
@@ -27,7 +28,7 @@ pub fn update(screen: &mut DateListScreen, input: &Input, sender: Sender<Event>)
                         Event::ChangeAppState(
                             crate::app::AppState::NewTransaction(
                                 NewTransactionScreen::new(
-                                NewTransactionParent::DateList(screen.clone()),
+                                ParentScreen::DateList(screen.clone()),
                                     None
                                 )
                             )
@@ -48,6 +49,22 @@ pub fn update(screen: &mut DateListScreen, input: &Input, sender: Sender<Event>)
                         });
                         
                         screen.update_dates()?;
+                    }
+                },
+                Input { key: Key::Char('c'), ctrl: true, ..} => {
+                    let selected_date = screen.get_selected_date();
+                    if let Some(date) = selected_date {
+                        let transactions = screen.transactions[&date].clone();
+                        sender.send(Event::ChangeAppState(
+                            crate::app::AppState::ChangeCategory(
+                                CategorySelectionScreen::new_with_selected(
+                                    screen.category.clone(),
+                                    transactions,
+                                    ParentScreen::DateList(screen.clone())
+                                )?
+                            ))
+                        )?;
+
                     }
                 },
                 Input { key: Key::Enter, .. }=>{
