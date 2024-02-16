@@ -1,7 +1,7 @@
 use std::{error::Error, sync::mpsc::Sender};
 use tui_textarea::{Input, Key};
 
-use crate::{app::{new_transaction::{ParentScreen, NewTransactionScreen, NewTransactionScreenFocus}, App}, events::Event, manager::{command_processing::process, Transaction}};
+use crate::{app::{new_transaction::{NewTransactionScreen, NewTransactionScreenFocus, ParentScreen}, App, StringToFloat}, events::Event, manager::{command_processing::process, Transaction}};
 
 
 pub fn update(screen: &mut NewTransactionScreen, input: &Input, sender: Sender<Event>)->Result<(), Box<(dyn Error)>>{
@@ -44,9 +44,9 @@ pub fn update(screen: &mut NewTransactionScreen, input: &Input, sender: Sender<E
                 Ok(timestamp) => {
                     if !description.is_empty() {
                         //let transaction = Transaction::new(amount, category_id, description, date)
-                        if !amount.is_empty() && matches!(date_timestamp,Ok(_)) {
+                        if !amount.is_empty() {
                             //let transaction = Transaction::new(amount, category_id, description, date)
-                            let amount_parsed = amount.parse::<f64>();
+                            let amount_parsed = amount.to_float();
                             if let Ok(amount) = amount_parsed {
                                 match &mut screen.parent {
                                     ParentScreen::DateList(e) => {

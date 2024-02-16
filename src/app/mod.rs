@@ -1,4 +1,4 @@
-use std::error::Error;
+use std::{error::Error, fmt::Display};
 
 
 use ratatui::{style::{Style, Stylize}, widgets::{Block, Borders, ListState}};
@@ -13,6 +13,101 @@ pub mod transactions_list;
 pub mod new_transaction;
 pub mod category_selection;
 
+
+#[derive(Debug)]
+pub struct InvalidNumberError;
+
+impl Display for InvalidNumberError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "unable to convert\ninvalid number")
+    }
+}
+
+impl Error for InvalidNumberError {
+    
+}
+
+pub trait StringToFloat{
+    fn check_symbol(f: String) -> bool;
+    fn check_valid(input: String, symbols: Vec<String>)->bool;
+    fn to_float(&self)->Result<f64, Box<(dyn Error)>>;
+}
+
+impl StringToFloat for String {
+    fn check_valid(input: String, mut symbols: Vec<String>)->bool {
+        if symbols.len()<2{
+            return true;
+        }
+        // let mut words = Vec::<Vec<String>>::new();
+        // let mut temp = Vec::<String>::new();
+        // for word in input.split("") {
+        //     if Self::check_symbol(word.to_string()){
+        //         words.push(temp.clone());
+        //         temp.clear();
+        //     }else{
+        //         temp.push(word.to_string());
+        //     }
+        // }
+
+        let mut is_valid: bool = true;
+        
+        let mut result = input.split(|c| {
+            Self::check_symbol(format!("{}", c))
+        } ).collect::<Vec<&str>>();
+        result.remove(result.len()-1);
+
+        if result.len() != symbols.len()/2 {
+            symbols.remove(0);
+            for r in result{
+                println!("{}", r);
+                if r.len()<3{
+                    is_valid = false;
+                }
+            }
+        }
+
+        // for word in &words{
+        //     if word.len()<3 && words.len()!=1{
+        //         is_valid = false;
+        //     }
+        // }
+
+        is_valid
+    }
+    fn check_symbol(f: String) -> bool {
+        f.eq(&".") || f.eq(&",") || f.eq(&"'") || f.eq(&" ")
+    }
+    fn to_float(&self)->Result<f64, Box<(dyn Error)>> {
+        let input = self;
+        let result = input.split("").filter(|f|
+            Self::check_symbol(f.to_string())
+        ).map(|f|f.to_string()).collect::<Vec<String>>();
+    
+        let mut non_repeated_symbols: Vec<String> = result.clone();
+        non_repeated_symbols.dedup();
+    
+        if non_repeated_symbols.len() > 2 || !Self::check_valid(input.clone(), result.clone()){
+            return Err(Box::new(InvalidNumberError{}));
+        }
+    
+        if non_repeated_symbols.len()==1 && !result.is_empty(){
+            let input = input.replace(result.first().unwrap(), ".");
+            return Ok(input.parse::<f64>()?);
+        }else if result.len()>1{
+            let input = input.replace(result.first().unwrap(), "");
+            let input = if !result.last().unwrap().eq("."){
+                input.replace(result.last().unwrap(), ".")
+            }else{
+                input
+            };
+    
+            return Ok(input.parse::<f64>()?);
+        }else{
+            return Ok(input.parse::<f64>()?);
+        }
+
+    }
+}
 
 #[derive(Debug)]
 pub enum AppState{
