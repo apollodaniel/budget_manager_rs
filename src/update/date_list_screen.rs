@@ -40,9 +40,13 @@ pub fn update(screen: &mut DateListScreen, input: &Input, sender: Sender<Event>)
                 },
                 Input { key: Key::Char('d'), ctrl: true, ..} => {
                     // loop for all transactions of this date and delete
-                    let selected = screen.get_selected_date();              
-                    if let Some(date) = selected {
-                        let transactions: &Vec<Transaction> = &screen.transactions[&date];
+                    let selected = screen.get_selected_date(false);              
+                    if let Some(dates) = selected {
+                        let mut transactions: Vec<Transaction> = Vec::new();
+                        
+                        for date in dates{
+                            transactions.append(&mut screen.transactions[&date].clone());
+                        }
                         
                         transactions.iter().for_each(|f|{
                             process(crate::manager::BudgetCommand::DeleteTransaction(f.clone())).expect("unable to delete transaction");
@@ -52,9 +56,14 @@ pub fn update(screen: &mut DateListScreen, input: &Input, sender: Sender<Event>)
                     }
                 },
                 Input { key: Key::Char('c'), ctrl: true, ..} => {
-                    let selected_date = screen.get_selected_date();
-                    if let Some(date) = selected_date {
-                        let transactions = screen.transactions[&date].clone();
+                    let selected_date = screen.get_selected_date(false);
+                    if let Some(dates) = selected_date {
+                        let mut transactions: Vec<Transaction> = Vec::new();
+                        
+                        for date in dates{
+                            transactions.append(&mut screen.transactions[&date].clone());
+                        }
+
                         sender.send(Event::ChangeAppState(
                             crate::app::AppState::ChangeCategory(
                                 CategorySelectionScreen::new_with_selected(
@@ -67,13 +76,22 @@ pub fn update(screen: &mut DateListScreen, input: &Input, sender: Sender<Event>)
 
                     }
                 },
+                Input { key: Key::Char(' '), .. }=>{
+                    if !screen.date_search.is_empty(){
+                        let selected_index = screen.get_selected_date_index();
+                        if let Some(index) = selected_index {
+                            screen.date_search[index].1 = !screen.date_search[index].1;
+                        }
+                    }
+                    
+                },
                 Input { key: Key::Enter, .. }=>{
                     // screen.change_listing_state(ListingState::List)
                     if !screen.date_search.is_empty(){
                         sender.send(
                             Event::ChangeAppState(
                                 crate::app::AppState::TransactionsList(
-                                    TransactionListScreen::new(&screen.category, &screen.get_selected_date().ok_or(InvalidSelectionError)?)?
+                                    TransactionListScreen::new(&screen.category, &screen.get_selected_date(true).ok_or(InvalidSelectionError)?.first().ok_or(InvalidSelectionError)?.clone())?
                                 )
                             )
                         )?;

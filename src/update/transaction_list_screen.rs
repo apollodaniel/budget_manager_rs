@@ -26,12 +26,13 @@ pub fn update(screen: &mut TransactionListScreen, input: &Input, sender: Sender<
                 },
                 Input { key: Key::Up, .. }=> screen.move_list_selection(crate::app::MoveSelection::Up),
                 Input { key: Key::Down, .. }=>screen.move_list_selection(crate::app::MoveSelection::Down),
-                Input { key: Key::Enter,.. } => {
-                    let selected_transaction = screen.get_selected_index();
-                    if let Some(transaction) = selected_transaction {
-                        screen.transactions_search[transaction].1 = !screen.transactions_search[transaction].1;
+                Input { key: Key::Char(' '),.. } => {
+                    if !screen.transactions_search.is_empty(){
+                        let selected_transaction = screen.get_selected_index();
+                        if let Some(transaction) = selected_transaction {
+                            screen.transactions_search[transaction].1 = !screen.transactions_search[transaction].1;
+                        }
                     }
-
                 },
                 Input { key: Key::Char('a'), ctrl: true, ..} => {
                     //screen.change_listing_state(ListingState::Add);

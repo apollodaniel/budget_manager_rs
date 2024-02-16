@@ -52,10 +52,12 @@ pub fn update(screen: &mut NewTransactionScreen, input: &Input, sender: Sender<E
                                     ParentScreen::DateList(e) => {
                                         create_transaction(amount, description, timestamp, e.category.category_id)?;
                                         e.update_dates()?;
+                                        e.search_dates();
                                     },
                                     ParentScreen::TransactionsList(e) => {
                                         create_transaction(amount, description, timestamp, e.category.category_id)?;
                                         e.update_transactions()?;
+                                        e.search_transactions();
                                     },
                                 };
                                 send_exit_event(screen, sender)?;

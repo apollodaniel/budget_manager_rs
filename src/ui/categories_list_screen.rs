@@ -6,7 +6,7 @@ use crate::{app::{self, categories_list::CategoryListScreen}, events::CrosstermT
 
 pub fn draw(screen: &mut CategoryListScreen, terminal: &mut CrosstermTerminal)->Result<(), Box<(dyn Error)>>{
         let block = Block::default().title("Categorias").borders(Borders::ALL);
-        let list = List::new(screen.categories_search.iter().map(|f|f.name.clone()).collect::<Vec<String>>())
+        let list = List::new(screen.categories_search.iter().map(|f|format!("{} {}", f.0.name, if f.1 {"[x]"}else{"[ ]"})).collect::<Vec<String>>())
             .block(block)
             .style(Style::default().fg(Color::White))
             .highlight_style(Style::default().add_modifier(Modifier::BOLD))

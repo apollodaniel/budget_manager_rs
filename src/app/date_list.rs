@@ -1,4 +1,4 @@
-use std::{collections::HashMap, error::Error};
+use std::{collections::HashMap, error::Error, vec};
 
 use ratatui::widgets::ListState;
 use crate::manager::{command_processing::list_transaction, Category, Transaction};
@@ -11,7 +11,7 @@ pub struct DateListScreen{
     pub date_list_state: ListState,
     pub listing_state: ListingState,
     pub search_text_area: TextArea<'static>,
-    pub date_search: Vec<String>,
+    pub date_search: Vec<(String, bool)>,
     pub add_text_area: TextArea<'static>,
 
     pub category: Category,
@@ -34,7 +34,11 @@ impl DateListScreen {
 
     pub fn search_dates(&mut self){
         let query = self.search_text_area.lines().first().unwrap().to_lowercase();
-        self.date_search = self.transactions.keys().filter(|f| f.to_lowercase().contains(query.as_str())).map(|f|f.clone()).collect::<Vec<String>>();
+        self.date_search = self.transactions
+            .keys()
+            .filter(|f| f.to_lowercase().contains(query.as_str()))
+            .map(|f|(f.clone(), false))
+            .collect::<Vec<(String, bool)>>();
     }
 
     pub fn get_dates(transactions: Vec<Transaction>)->Option<Vec<String>>{
@@ -50,7 +54,10 @@ impl DateListScreen {
             search_text_area: App::get_new_focused_text_area("Procurar",""),
             add_text_area: App::get_new_focused_text_area("Nova transação",""),
             listing_state: ListingState::List,
-            date_search: transactions.keys().map(|f|f.clone()).collect::<Vec<String>>(),
+            date_search: transactions
+            .keys()
+            .map(|f|(f.clone(), false))
+            .collect::<Vec<(String, bool)>>(),
             transactions: transactions,
             category: category,
             date_list_state: App::create_list_state(0),
@@ -59,8 +66,12 @@ impl DateListScreen {
 
     pub fn new_with_selected(category: Category, date: String)->Result<Self, Box<(dyn Error)>>{
         let transactions = Self::get_transactions_hashmaps(&category)?;
-        let date_search = transactions.keys().map(|f|f.clone()).collect::<Vec<String>>();
-        let index = date_search.iter().position(|f| f==&date).unwrap_or(0);
+        let date_search = transactions
+            .keys()
+            .map(|f|(f.clone(), false))
+            .collect::<Vec<(String, bool)>>();
+
+        let index = date_search.iter().position(|f| f.0==date).unwrap_or(0);
         Ok(Self { 
             search_text_area: App::get_new_focused_text_area("Procurar",""),
             add_text_area: App::get_new_focused_text_area("Nova transação",""),
@@ -72,14 +83,26 @@ impl DateListScreen {
         })
     }
 
-    pub fn get_selected_date(&self) -> Option<String>{
+    pub fn get_selected_date(&self, single_selection: bool) -> Option<Vec<String>>{
+        let selected_dates = self.date_search.iter().filter(|f|f.1).map(|f|f.0.clone()).collect::<Vec<String>>();
+    
+        if selected_dates.is_empty() || single_selection{
+            let selected = self.date_list_state.selected()?;
+            return Some(vec![self.date_search.get(selected)?.0.clone()]);  
+        }else{
+            return Some(selected_dates);  
+        }
+        
+    }
+
+    pub fn get_selected_date_index(&self) -> Option<usize>{
         let selected = self.date_list_state.selected()?;
-        return Some(self.date_search.get(selected)?.clone());  
+        return Some(selected);  
     }
 
     pub fn update_dates(&mut self)->Result<(), Box<(dyn Error)>>{
-        let transactions = Self::get_transactions_hashmaps(&self.category)?;
-        self.date_search = transactions.keys().map(|f|f.clone()).collect();
+        self.transactions = Self::get_transactions_hashmaps(&self.category)?;
+        self.date_search = self.transactions.keys().map(|f|(f.clone(), false)).collect();
         Ok(())
     }
 
@@ -98,7 +121,7 @@ impl DateListScreen {
 impl MoveListSelection<String> for DateListScreen {
     fn move_list_selection(&mut self, move_selection: super::MoveSelection) {
         if !self.date_search.is_empty(){
-            Self::move_list_selection_logic(move_selection,&mut self.date_list_state, &self.date_search)
+            Self::move_list_selection_logic(move_selection,&mut self.date_list_state, &self.date_search.iter().map(|f|f.0.clone()).collect())
         }
     }
 }

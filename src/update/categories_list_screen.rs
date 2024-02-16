@@ -21,8 +21,16 @@ pub fn update(screen: &mut CategoryListScreen, input: &Input, sender: Sender<Eve
                 Input { key: Key::Down, .. }=>screen.move_list_selection(crate::app::MoveSelection::Down),
                 Input { key: Key::Enter,.. } => {
                     if !screen.categories_search.is_empty(){
-                        if let Some(t) = screen.get_selected_category() {
-                            sender.send(Event::ChangeAppState(crate::app::AppState::DateList(DateListScreen::new(t)?)))?;
+                        if let Some(categories) = screen.get_selected_category(true) {
+                            sender.send(Event::ChangeAppState(crate::app::AppState::DateList(DateListScreen::new(categories.first().expect("unable to get selected category").clone())?)))?;
+                        }
+                    }
+                },
+                Input { key: Key::Char(' '), .. }=>{
+                    if !screen.categories_search.is_empty(){
+                        let selected_index = screen.get_selected_category_index();
+                        if let Some(index) = selected_index {
+                            screen.categories_search[index].1 = !screen.categories_search[index].1;
                         }
                     }
                 },
@@ -33,17 +41,20 @@ pub fn update(screen: &mut CategoryListScreen, input: &Input, sender: Sender<Eve
                     screen.change_listing_state(ListingState::Search);
                 },
                 Input { key: Key::Char('d'), ctrl: true, ..} => {
-                    let selected_category = screen.get_selected_category();
-                    if let Some(category) = selected_category {
+                    let selected_categories = screen.get_selected_category(false);
+                    if let Some(categories) = selected_categories {
                         // delete associated transactions
                         let transactions = list_transaction()?;
-                        transactions.iter().for_each(|f| {
-                            if f.category_id == category.category_id{
-                                process(crate::manager::BudgetCommand::DeleteTransaction(f.clone())).expect("unable to delete transaction");
-                            }
-                        });
-                        // delete category
-                        process(crate::manager::BudgetCommand::DeleteCategory(category))?;
+                        
+                        for category in categories{
+                            transactions.iter().for_each(|f| {
+                                if f.category_id == category.category_id{
+                                    process(crate::manager::BudgetCommand::DeleteTransaction(f.clone())).expect("unable to delete transaction");
+                                }
+                            });
+                            // delete category
+                            process(crate::manager::BudgetCommand::DeleteCategory(category))?;
+                        }
                         screen.update_categories()?;
                     }
                 },

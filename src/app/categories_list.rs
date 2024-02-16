@@ -12,7 +12,7 @@ pub struct CategoryListScreen{
 
     pub search_text_area: TextArea<'static>,
     pub categories: Vec<Category>,
-    pub categories_search: Vec<Category>,
+    pub categories_search: Vec<(Category, bool)>,
     pub categories_list_state: ListState,
     pub add_text_area: TextArea<'static>,
 
@@ -28,7 +28,7 @@ impl CategoryListScreen{
         Ok(Self { 
             search_text_area: App::get_new_focused_text_area("Procurar",""),
             add_text_area: App::get_new_focused_text_area("Nova categoria",""),
-            categories_search: categories.clone(),
+            categories_search: categories.iter().map(|f|(f.clone(), false)).collect::<Vec<(Category, bool)>>(),
             categories_list_state: App::create_list_state(0),
             categories: categories,
             listing_state: ListingState::List
@@ -50,8 +50,9 @@ impl CategoryListScreen{
         Ok(Self { 
             search_text_area: App::get_new_focused_text_area("Procurar",""),
             add_text_area: App::get_new_focused_text_area("Nova categoria",""),
-            categories_search: categories.clone(),
+            categories_search: categories.iter().map(|f|(f.clone(), false)).collect::<Vec<(Category, bool)>>(),
             categories_list_state: App::create_list_state(index),
+
             categories: categories,
             listing_state: ListingState::List
         })
@@ -65,23 +66,44 @@ impl CategoryListScreen{
 
     pub fn search_category(&mut self){
         let query = self.search_text_area.lines().first().unwrap().to_lowercase();
-        self.categories_search = self.categories.clone().into_iter().filter(|f| f.name.to_lowercase().contains(query.as_str())).collect::<Vec<Category>>();
+        self.categories_search = self.categories.iter().filter(|f| f.name.to_lowercase().contains(query.as_str())).map(|f|(f.clone(), false)).collect::<Vec<(Category, bool)>>();
     }
 
-    
-
-    pub fn get_selected_category(&self) -> Option<Category>{
+    pub fn get_selected_category_index(&self) -> Option<usize>{
         let selected = self.categories_list_state.selected();
-        let id = self.categories_search.get(selected?)?.category_id;
+        let id = self.categories_search.get(selected?)?.0.category_id;
         
-        let mut category: Option<Category> = None;
-        for _category in &self.categories{
+        let mut category: Option<usize> = None;
+        for (index, _category) in self.categories.iter().enumerate(){
             if _category.category_id == id{
-                category = Some(_category.clone());
+                category = Some(index);
                 break;
             }
         }
-        return category;  
+
+        return category;
+    }
+
+    pub fn get_selected_category(&self, single_selection: bool) -> Option<Vec<Category>>{
+        let selected_categories = self.categories_search.iter()
+            .filter(|f| f.1)
+            .map(|f| f.0.clone()).collect::<Vec<Category>>();
+
+        if selected_categories.is_empty() || single_selection{
+            let selected = self.categories_list_state.selected();
+            let id = self.categories_search.get(selected?)?.0.category_id;
+            
+            let mut category: Option<Vec<Category>> = None;
+            for _category in &self.categories{
+                if _category.category_id == id{
+                    category = Some(vec![_category.clone()]);
+                    break;
+                }
+            }
+            return category;  
+        }else{
+            return Some(selected_categories);
+        }
     }
 }
 
