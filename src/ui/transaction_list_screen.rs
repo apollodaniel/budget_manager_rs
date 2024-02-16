@@ -15,7 +15,7 @@ pub fn draw(screen: &mut TransactionListScreen, terminal: &mut CrosstermTerminal
                 f.0.description.clone(),
                 f.0.get_amount_formatted(),
                 f.0.get_date_formatted().unwrap_or("".to_string()),
-                if f.1 {"[X]"}else{"[ ]"}
+                if f.1 {"[X]"}else{""}
         )
     ).collect::<Vec<String>>())
         .block(block)

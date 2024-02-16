@@ -8,7 +8,7 @@ use crate::{app::{self, date_list::DateListScreen}, events::CrosstermTerminal};
 pub fn draw(screen: &mut DateListScreen, terminal: &mut CrosstermTerminal)->Result<(), Box<(dyn Error)>>{
     let block = Block::default().title("Data").borders(Borders::ALL);
     let list = List::new(
-            screen.date_search.iter().map(|f| format!("{} {}", f.0, if f.1 {"[X]"}else{"[ ]"}))
+            screen.date_search.iter().map(|f| format!("{} {}", f.0, if f.1 {"[X]"}else{""}))
     )
         .block(block)
         .style(Style::default().fg(Color::White))
