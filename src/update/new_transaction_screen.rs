@@ -61,7 +61,7 @@ pub fn update(screen: &mut NewTransactionScreen, input: &Input, sender: Sender<E
                                 send_exit_event(screen, sender)?;
 
                             }else{
-                                screen.error = Some(String::from("Valor inválido.\nTente algo como: 1220.0"));
+                                screen.error = Some(String::from("Valor inválido.\nTente algo como: 12,50"));
                             }
                         }else{
                             screen.error = Some(String::from("O valor da transação não pode estar vázio"));

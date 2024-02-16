@@ -11,9 +11,9 @@ pub fn draw(screen: &mut TransactionListScreen, terminal: &mut CrosstermTerminal
     let list = List::new(
         screen.transactions_search.iter().map(
             |f|format!(
-                "{} - {:.2} - {}",
+                "{} - {} - {}",
                 f.description.clone(),
-                f.amount.clone(),
+                f.get_amount_formatted(),
                 f.get_date_formatted().unwrap_or("".to_string()
             )
         )

@@ -59,7 +59,6 @@ impl StringToFloat for String {
         if result.len() != symbols.len()/2 {
             symbols.remove(0);
             for r in result{
-                println!("{}", r);
                 if r.len()<3{
                     is_valid = false;
                 }

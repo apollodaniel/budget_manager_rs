@@ -1,7 +1,7 @@
-use std::{error::Error, fmt::Display, fs::{create_dir, File}, time::{Instant, UNIX_EPOCH}};
+use std::{error::Error, fmt::{Debug, Display}, fs::{create_dir, File}, time::{Instant, UNIX_EPOCH}};
 
 
-
+use numfmt::{Formatter, Numeric};
 use rusqlite::{Connection, Row};
 
 use self::command_processing::{get_new_category_id, get_new_transaction_id};
@@ -143,6 +143,12 @@ impl Transaction {
     pub fn get_date_formatted(&self)->Option<String>{
         let datetime = chrono::DateTime::from_timestamp_millis(self.timestamp);
         Some(datetime?.format("%e %b %Y").to_string())
+    }
+
+    pub fn get_amount_formatted(&self)->String{
+        let mut formatter: Formatter = "[n]".parse().unwrap();
+        let formatted = formatter.fmt2(Numeric::to_f64(&self.amount));
+        formatted.to_string()
     }
 
     pub fn new(amount: f64, category_id: u32, description: String, date: Option<i64>) -> Result<Self, Box<(dyn Error)>>{
