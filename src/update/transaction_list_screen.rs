@@ -27,7 +27,11 @@ pub fn update(screen: &mut TransactionListScreen, input: &Input, sender: Sender<
                 Input { key: Key::Up, .. }=> screen.move_list_selection(crate::app::MoveSelection::Up),
                 Input { key: Key::Down, .. }=>screen.move_list_selection(crate::app::MoveSelection::Down),
                 Input { key: Key::Enter,.. } => {
-                    
+                    let selected_transaction = screen.get_selected_index();
+                    if let Some(transaction) = selected_transaction {
+                        screen.transactions_search[transaction].1 = !screen.transactions_search[transaction].1;
+                    }
+
                 },
                 Input { key: Key::Char('a'), ctrl: true, ..} => {
                     //screen.change_listing_state(ListingState::Add);
@@ -46,14 +50,14 @@ pub fn update(screen: &mut TransactionListScreen, input: &Input, sender: Sender<
                     screen.change_listing_state(ListingState::Search);
                 },
                 Input { key: Key::Char('c'), ctrl: true, ..} => {
-                    let selected_transaction = screen.get_selected_transaction();
+                    let selected_transaction = screen.get_selected_transaction(false);
                     if let Some(transaction) = selected_transaction {
                         
                         sender.send(Event::ChangeAppState(
                             crate::app::AppState::ChangeCategory(
                                 CategorySelectionScreen::new_with_selected(
                                     screen.category.clone(),
-                                    vec![transaction.clone()],
+                                    transaction,
                                     ParentScreen::TransactionsList(screen.clone())
                                 )?
                             ))
@@ -62,11 +66,14 @@ pub fn update(screen: &mut TransactionListScreen, input: &Input, sender: Sender<
                     }
                 },
                 Input { key: Key::Char('d'), ctrl: true, ..} => {
-                    let selected_transaction = screen.get_selected_transaction();
-                    if let Some(transaction) = selected_transaction {
-                        process(crate::manager::BudgetCommand::DeleteTransaction(transaction))?;
-                        let last_transaction = screen.transactions.len()==1;
+                    let selected_transaction = screen.get_selected_transaction(false);
+                    if let Some(transactions) = selected_transaction {
+                        for transaction in transactions {
+                            process(crate::manager::BudgetCommand::DeleteTransaction(transaction))?;
+                        }
                         screen.update_transactions()?;
+                        let last_transaction = screen.transactions.is_empty();
+
                         if last_transaction{
                             sender.send(
                                 Event::ChangeAppState(

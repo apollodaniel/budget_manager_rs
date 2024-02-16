@@ -11,11 +11,11 @@ pub fn draw(screen: &mut TransactionListScreen, terminal: &mut CrosstermTerminal
     let list = List::new(
         screen.transactions_search.iter().map(
             |f|format!(
-                "{} - {} - {}",
-                f.description.clone(),
-                f.get_amount_formatted(),
-                f.get_date_formatted().unwrap_or("".to_string()
-            )
+                "{} - {} - {} {}",
+                f.0.description.clone(),
+                f.0.get_amount_formatted(),
+                f.0.get_date_formatted().unwrap_or("".to_string()),
+                if f.1 {"[X]"}else{"[ ]"}
         )
     ).collect::<Vec<String>>())
         .block(block)

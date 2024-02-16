@@ -27,7 +27,7 @@ pub struct TransactionListScreen{
     pub add_text_area: TextArea<'static>,
 
     pub transactions: Vec<Transaction>,
-    pub transactions_search: Vec<Transaction>,
+    pub transactions_search: Vec<(Transaction, bool)>,
     pub transactions_list_state: ListState,
 
     pub category: Category,
@@ -42,7 +42,7 @@ impl TransactionListScreen{
         Ok(Self { 
             search_text_area: App::get_new_focused_text_area("Procurar",""),
             add_text_area: App::get_new_focused_text_area("Nova transação",""),
-            transactions_search: transactions.clone(),
+            transactions_search: transactions.iter().map(|f|(f.clone(), false)).collect::<Vec<(Transaction, bool)>>(),
             transactions_list_state: App::create_list_state(0),
             transactions: transactions,
             current_date: date.clone(),
@@ -64,21 +64,45 @@ impl TransactionListScreen{
         Ok(transactions_hashmap.get(date).unwrap_or(&vec![]).clone())
     }
 
-    pub fn get_selected_transaction(&self) -> Option<Transaction>{
+    pub fn get_selected_index(&self) -> Option<usize>{
         let selected = self.transactions_list_state.selected();
         if let Some(selected) = selected {
-            let id = self.transactions_search[selected].id;
+            let id = self.transactions_search[selected].0.id;
 
-            let mut transaction: Option<Transaction> = None;
-            for _transaction in &self.transactions_search{
-                if _transaction.id == id{
-                    transaction = Some(_transaction.clone());
+            let mut transaction: Option<usize> = None;
+            for (index, _transaction) in self.transactions_search.iter().enumerate(){
+                if _transaction.0.id == id{
+                    transaction = Some(index);
                     break;
                 }
             }
             return transaction;  
         }else{
             return None;
+        }
+    }
+
+    pub fn get_selected_transaction(&self, single_selection: bool) -> Option<Vec<Transaction>>{
+        let selected_transactions = self.transactions_search.iter().filter(|f|f.1).map(|f|f.0.clone()).collect::<Vec<Transaction>>();
+
+        if selected_transactions.is_empty() || single_selection{
+            let selected = self.transactions_list_state.selected();
+            if let Some(selected) = selected {
+                let id = self.transactions_search[selected].0.id;
+    
+                let mut transaction: Option<Vec<Transaction>> = None;
+                for _transaction in &self.transactions_search{
+                    if _transaction.0.id == id{
+                        transaction = Some(vec![_transaction.0.clone()]);
+                        break;
+                    }
+                }
+                return transaction;  
+            }else{
+                return None;
+            }
+        }else{
+            return Some(selected_transactions);
         }
     }
 
@@ -90,8 +114,9 @@ impl TransactionListScreen{
 
     pub fn search_transactions(&mut self){
         let query = self.search_text_area.lines().first().unwrap().to_lowercase();
-        self.transactions_search = self.transactions.clone().into_iter().filter(|f| f.description.to_lowercase().contains(query.as_str())).collect::<Vec<Transaction>>();
+        self.transactions_search = self.transactions.iter().filter(|f| f.description.to_lowercase().contains(query.as_str())).map(|f|(f.clone(), false)).collect::<Vec<(Transaction,bool)>>();
     }
+
 
 }
 
