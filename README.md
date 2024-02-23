@@ -1,6 +1,16 @@
 # Budget Manager Rs
 Gerenciador de financias feito em Rust usando Ratatui e SQLite.
 
+Execute usando o cargo :
+```bash
+cargo run -q --release
+```
+
+Ou construa o binário:
+```bash
+cargo build --release
+```
+
 ## Controles
 ### Em Listas
 - <b>Control + A</b> - Adicionar (Transação ou Categoria)
